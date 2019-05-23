@@ -1,4 +1,4 @@
-      subroutine fitbsir(epi, gamaEpi,wght,nparam,
+      subroutine fitseir(epi, gamaEpi,wght,nparam,
      $     par,parmin,parmax,step,ilog,Temp,
      $     imask,iseed,nsamps,ithin,ndata,tps,rtn,
      $     curMin, ndays, nRnd, tab, profiles) 
@@ -46,7 +46,6 @@ c$$$      real*8 dsdt(ndata*nstep*iday_per_week)
       real*8 scaleNdata
       integer ionep
       integer nlines, iline, iburn
-      integer iweeks_per_year
       external calcFit1D,ran1
 
 
@@ -65,7 +64,7 @@ c$$$      real*8 dsdt(ndata*nstep*iday_per_week)
       step_min = 1e-5
       iadapt = 0
       
-      scaleNdata = 1.0 !sum(wght) * Temp
+      scaleNdata = sum(wght) * Temp
 
 ! ran1 works with -iseed
 
@@ -103,8 +102,6 @@ c$$$      real*8 dsdt(ndata*nstep*iday_per_week)
          endif
       enddo
 
-
-
 ! convert 0 and 1 to true and false
 
       do i=1,nparam
@@ -125,8 +122,7 @@ c$$$      real*8 dsdt(ndata*nstep*iday_per_week)
 
 ! integrate the ODEs to get the profiles
 ! This is the parameter order
-! c("NH", "Tg", "R0", "sigma",  "pC", "t0", "seed", "e_bckgrnd", "dp", "dq", "ts", "dL")
-
+! c("NH", "Tg", "R0", "sigma",  "pC", "t0", "seed", "e_bckgrnd")
 
       pC = curpars(5)
       e_bckgrnd = curpars(8)
@@ -139,18 +135,17 @@ c$$$      real*8 dsdt(ndata*nstep*iday_per_week)
 ! Initial solution 
 !
 
-      call RK4bSIR(ndata,ndays,nstep,tps,
+      call RK4SEIR(ndata,ndays,nstep,tps,
      $           nparam,curpars,dsdt)
 
       call weekly1D(ndata, ndays, nstep, imid, dsdt, pC,e_bckgrnd, 
      $     rtn)
-
+      
 !
 ! calculate Likelihood of the solution
 !
 
       curLLK = calcFit1D(epi,gamaEpi,rtn,wght,ndata)
-
       curLLK = curLLK / (scaleNdata)
 
 !
@@ -173,8 +168,7 @@ c$$$      real*8 dsdt(ndata*nstep*iday_per_week)
             if (nopt(k) .eq. 0) go to 102
             savepar = curpars
             copypar = curpars
-    
-            
+                
 ! Propose a new value for each parameter we are optimizing 
 ! half the steps will be small and half will be the given size
             call fnProposeParamUpdates(nparam,copypar,
@@ -191,8 +185,7 @@ c$$$      real*8 dsdt(ndata*nstep*iday_per_week)
             rtnNew = 0.0d0
             dsdt   = 0.0d0
 
-            
-            call RK4bSIR(ndata,ndays,nstep,tps,
+            call RK4SEIR(ndata,ndays,nstep,tps,
      $           nparam,curpars,dsdt)
 
             rtnNew = 0.0d0
@@ -250,18 +243,20 @@ c$$$      real*8 dsdt(ndata*nstep*iday_per_week)
 ! see aove 
 
       iburn = nlines/5
-   
       do i = 1, nRnd
          iline = iburn + floor(ran1(iseed)*(nlines - iburn)) 
          curpars = tab(iline, 1:nparam)
          pC = curpars(5)
          e_bckgrnd = curpars(8)
-         call RK4bSIR(ndata,ndays,nstep,tps,
+         call RK4SEIR(ndata,ndays,nstep,tps,
      $        nparam,curpars,dsdt)
         call weekly1D(ndata, ndays, nstep, imid, dsdt, pC,e_bckgrnd,
      $        rtn)
          profiles(i, 1:ndata) = real(rtn)
       enddo
+
+!! End of generating profiles
+
      
       rtn = rtnBest
       par = parBest
@@ -269,20 +264,20 @@ c$$$      real*8 dsdt(ndata*nstep*iday_per_week)
   
       return
          
-      end subroutine fitbsir
+      end subroutine fitseir
 
-! -----------------------------------------------------------------------------
-      subroutine RK4bSIR(ndata,ndays,nstep,tps,
+! ------------------------------------------------------------------------
+
+      subroutine RK4SEIR(ndata,ndays,nstep,tps,
      $     nparam,curpars,dsdt)
 
 
       implicit none
 
       integer iday_per_week, np, nc
-      parameter (iday_per_week = 7, np = 3, nc = 4)
+      parameter (iday_per_week = 7, np = 4, nc = 5)
       integer ndata, nstep, ndays, nparam
       real*8 curpars(nparam)
-      real*8 delta, dp, dq, del_p, del_q, ts, dL
       real*8 dt
       real*8 t0, R0, Tg, sigma
       real*8 fN
@@ -293,7 +288,7 @@ c$$$      real*8 dsdt(ndata*nstep*iday_per_week)
       real*8 tps2(0:(ndata+1))
       real*8 y(nc), tmpY(nc)
       real*8 dy1(nc), dy2(nc), dy3(nc), dy4(nc)
-      real*8 t_cur, Rt
+      real*8 t_cur
       real*8 p5, p3, p6
       real*8 pars(np)
 
@@ -313,10 +308,6 @@ c$$$      real*8 dsdt(ndata*nstep*iday_per_week)
       sigma = curpars(4)
       t0 = curpars(6)
       seed = curpars(7)
-      dp = curpars(9)
-      dq = curpars(10)
-      ts  = curpars(11)
-      dL = curpars(12)
  
       tps2 = 0.0d0
       tps2(1:ndata) = tps
@@ -325,30 +316,22 @@ c$$$      real*8 dsdt(ndata*nstep*iday_per_week)
       t_cur = tps2(0)
 
 !! Pack what we need - N, beta(t) and sigma - for the ODEs
-      pars(1) = fN    !Will get updated below
+      pars(1) = fN   
       pars(2) = Tg
-      pars(3) = R0/Tg ! will be updated below to beta(t)
+      pars(3) = R0/Tg
+      pars(4) = sigma
 
-             
-      delta = 0.5 * (1.0d0+tanh((t_cur - ts - t0)/dL))
-      del_p = 1.0d0 - (1-dp) * delta
-      del_q = 1.0d0 - (1-dq) * delta
 
 ! initialize things - this is the Y vector
 
-      y(1) = del_p * fN - del_q * seed !fN * fraction-1.0
-      y(2) = del_q * seed
+      y(1) = fN - seed !fN * fraction-1.0
+      y(2) = seed
       y(3) = 0.0d0
       y(4) = 0.0d0
+      y(5) = 0.0d0
 
       dsdt = 0.0d0
 
-! The denominator of the population
-      pars(1) = del_p * y(1) +
-     $     del_q * y(2) + y(3)
-  
-! calculate the time dependent force of infection
-      pars(3) = R0 / Tg * del_p * del_q
 
       icount = 0
 
@@ -369,30 +352,20 @@ c$$$      real*8 dsdt(ndata*nstep*iday_per_week)
                 go to 101
              end if
              
-             delta = 0.5 * (1.0d0+tanh((t_cur - ts - t0)/dL))
-             del_p = 1.0d0 - (1-dp) * delta
-             del_q = 1.0d0 - (1-dq) * delta
-
-! The denominator of the population
-             pars(1) = del_p * y(1) +
-     $            del_q * y(2) + y(3)
-  
-! calculate the time dependent force in infection
-             pars(3) = R0 / Tg * del_p * del_q
               
-             call derivSIR(pars, Y, dY1, np, nc)
+             call derivSEIR(pars, Y, dY1, np, nc)
 
              tmpY = Y + dt * dY1 * p5
 
-             call derivSIR(pars, tmpY, dY2, np, nc)
+             call derivSEIR(pars, tmpY, dY2, np, nc)
 
              tmpY = Y + dt * dY2 * p5
 
-             call derivSIR(pars, tmpY, dY3, np, nc)
+             call derivSEIR(pars, tmpY, dY3, np, nc)
                
              tmpY = Y + dt * dY3
 
-             call derivSIR(pars, tmpY, dY4, np, nc)
+             call derivSEIR(pars, tmpY, dY4, np, nc)
                
              tmpY = Y + dt * ( dY1 * p6 + dY2 * p3 +
      $            dY3 * p3 + dY4 * p6 )
@@ -401,10 +374,13 @@ c$$$      real*8 dsdt(ndata*nstep*iday_per_week)
 !     Update -dS/dt       
              icount= icount + 1
                
-             dsdt(icount) = y(4)
+             dsdt(icount) = y(nc)
 
           enddo                 ! End of loop over days
       enddo
 
        return
-       end subroutine RK4bSIR
+       end subroutine RK4SEIR
+
+
+

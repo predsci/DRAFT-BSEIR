@@ -45,7 +45,6 @@
       real*8 scaleNdata
       integer ionep
       integer nlines, iline, iburn
-      integer iweeks_per_year
       external calcFit1D,ran1
 
 
@@ -290,7 +289,7 @@ c$$$      real*8 dsdt(ndata*nstep*iday_per_week)
       real*8 tps2(0:(ndata+1))
       real*8 y(nc), tmpY(nc)
       real*8 dy1(nc), dy2(nc), dy3(nc), dy4(nc)
-      real*8 t_cur, Rt
+      real*8 t_cur
       real*8 p5, p3, p6
       real*8 pars(np)
 

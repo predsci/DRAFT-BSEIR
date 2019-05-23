@@ -1,0 +1,33 @@
+Package: DRAFT
+Type: Package
+Title: Disease Rapid Analysis and Forecasting Tool
+Version: 0.1.0
+Authors@R: c(person(given="Michal", family="Ben-Nun", email="mbennun@predsci.com", role="aut"), 
+	person(given="James", family="Turtle", email="jturtle@predsci.com", role="cre"),
+	person(given="Pete", family="Riley", email="pete@predsci.com", role="ctb"))
+Author: Michal Ben-Nun <mbennun@predsci.com> [aut],
+	James Turtle <jturtle@predsci.com> [cre],
+	Pete Riley <pete@predsci.com> [ctb]
+Maintainer: James Turtle <jturtle@predsci.com>
+Description: Using an MCMC procedure, fit an SIR, SEIR or behavior modification SIR model 	to user-provided incidence data.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+NeedsCompilation: yes
+Imports:
+    stats,
+    utils,
+    tools,
+    coda,
+    MASS,
+    plotly,
+    gridExtra,
+    ggplot2,
+    reshape,
+    dplyr,
+    lubridate (>= 1.7.0)
+RoxygenNote: 6.1.1
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

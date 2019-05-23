@@ -1,0 +1,6 @@
+doc
+Meta
+inst/doc
+.Rhistory
+src/*.o
+src/*.so
