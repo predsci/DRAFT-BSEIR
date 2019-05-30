@@ -2,7 +2,7 @@
 % Please edit documentation in R/fit_user_data_fxns.R
 \name{runDRAFT}
 \alias{runDRAFT}
-\title{Main Driver for using \code{DRAFT} for Fitting User Provided Incidence}
+\title{Main driver for using \code{DRAFT} to fit user provided incidence data.}
 \usage{
 runDRAFT(inc_data = NULL, pop = 10000, epi_model = 1, Tg = 3,
   sigma = NULL, dp = NULL, dq = NULL, ts = NULL, dL = NULL)
@@ -27,7 +27,20 @@ runDRAFT(inc_data = NULL, pop = 10000, epi_model = 1, Tg = 3,
 \item{dL}{Number of days for behavior modification to completely take effect.}
 }
 \value{
-results A list with the input and entire output of the run.
+A list with the input and entire output of the run.  List entries:
+  \itemize{
+    \item \emph{$mydata}: A data structure containing the input data.
+    \item \emph{$rtn}: The best-fit profile.
+    \item \emph{$profile}: The full MCMC distribution of incidence profiles as a matrix. 
+    \item \emph{$tab}: The full MCMC distribution of parameters as a matrix.
+  }
+  Additional output is written to a subdirectory 'user_data_*' within the current working directory.  File list:
+  \itemize{
+    \item \emph{results-user_data-*.png}: This image shows the fit relative to the data as well as critical-parameter distributions. 
+    \item \emph{user_data-incidence.png}: Incidence data plot.
+    \item \emph{mcmc-user_data-*.RData}: A list that includes the resulting MCMC parameter distributions.
+    \item \emph{profiles-user_data-*.RData}: A list that includes resulting distribution of incidence profiles.
+  }
 }
 \description{
 \code{runDRAFT} reads in a user provided incidence file and uses that along with the user
@@ -37,6 +50,9 @@ Data cadence is arbitrary but at most can be monthly
 We support only S-I-R and S-E-I-R models for a single population with a fixed force of infection
 The incidence file must have two columns: dates and cases
 All other parameters are set by the code
+}
+\details{
+Data fitting is done using a Markov Chain Monte Carlo (MCMC) procedure.  While generally discussed in the context of optimization, this procedure results in a mapping of the objective distribution.  Thus the results of runDRAFT() come in the form of a distribution of parameters and the resulting distribution of incidence profiles.
 }
 \examples{
 # Run an SEIR model using the incidence file and assuming a population of 1 million people.

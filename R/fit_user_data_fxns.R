@@ -4,7 +4,7 @@
 
 
 
-#' Main Driver for using \code{DRAFT} for Fitting User Provided Incidence
+#' Main driver for using \code{DRAFT} to fit user provided incidence data.
 #'
 #' \code{runDRAFT} reads in a user provided incidence file and uses that along with the user
 #' provided population size and value for the generation time, Tg, and if relevant the latent period
@@ -22,7 +22,21 @@
 #' @param dq Proportion of infectious contact rate (0-1) following behavior modification.  If infectious cases reduce their contacts by one half, set \code{dq=0.5}.  Only used if inc_data requires a forecast.
 #' @param ts Date class.  Start date of behavior modification.
 #' @param dL Number of days for behavior modification to completely take effect.
-#' @return results A list with the input and entire output of the run.
+#' @return A list with the input and entire output of the run.  List entries:
+#'   \itemize{
+#'     \item \emph{$mydata}: A data structure containing the input data.
+#'     \item \emph{$rtn}: The best-fit profile.
+#'     \item \emph{$profile}: The full MCMC distribution of incidence profiles as a matrix. 
+#'     \item \emph{$tab}: The full MCMC distribution of parameters as a matrix.
+#'   }
+#'   Additional output is written to a subdirectory 'user_data_*' within the current working directory.  File list:
+#'   \itemize{
+#'     \item \emph{results-user_data-*.png}: This image shows the fit relative to the data as well as critical-parameter distributions. 
+#'     \item \emph{user_data-incidence.png}: Incidence data plot.
+#'     \item \emph{mcmc-user_data-*.RData}: A list that includes the resulting MCMC parameter distributions.
+#'     \item \emph{profiles-user_data-*.RData}: A list that includes resulting distribution of incidence profiles.
+#'   }
+#' @details Data fitting is done using a Markov Chain Monte Carlo (MCMC) procedure.  While generally discussed in the context of optimization, this procedure results in a mapping of the objective distribution.  Thus the results of runDRAFT() come in the form of a distribution of parameters and the resulting distribution of incidence profiles.
 #' @examples
 #' # Run an SEIR model using the incidence file and assuming a population of 1 million people.
 #' # The generation time and latent period are set to 2.6 days and 3 days respectively
