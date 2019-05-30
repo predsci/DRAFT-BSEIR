@@ -43,13 +43,9 @@ A list with the input and entire output of the run.  List entries:
   }
 }
 \description{
-\code{runDRAFT} reads in a user provided incidence file and uses that along with the user
-provided population size and value for the generation time, Tg, and if relevant the latent period
-sigma to fit, and if desired, forecast the incidence.
-Data cadence is arbitrary but at most can be monthly
-We support only S-I-R and S-E-I-R models for a single population with a fixed force of infection
-The incidence file must have two columns: dates and cases
-All other parameters are set by the code
+\code{runDRAFT} accepts a user provided incidence dataframe and uses that along with the user provided population and generation time, Tg, (and if relevant the latent period sigma) to fit the incidence data.  Additionally, when specified by the user, \code{runDRAFT} will also generate a forecast for the incidence.
+Data cadence is arbitrary but at most can be monthly.
+We support S-I-R and S-E-I-R models for a single population with a fixed (non-time-dependent) force of infection.
 }
 \details{
 Data fitting is done using a Markov Chain Monte Carlo (MCMC) procedure.  While generally discussed in the context of optimization, this procedure results in a mapping of the objective distribution.  Thus the results of runDRAFT() come in the form of a distribution of parameters and the resulting distribution of incidence profiles.

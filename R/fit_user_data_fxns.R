@@ -6,13 +6,9 @@
 
 #' Main driver for using \code{DRAFT} to fit user provided incidence data.
 #'
-#' \code{runDRAFT} reads in a user provided incidence file and uses that along with the user
-#' provided population size and value for the generation time, Tg, and if relevant the latent period
-#' sigma to fit, and if desired, forecast the incidence.
-#' Data cadence is arbitrary but at most can be monthly
-#' We support only S-I-R and S-E-I-R models for a single population with a fixed force of infection
-#' The incidence file must have two columns: dates and cases
-#' All other parameters are set by the code
+#' \code{runDRAFT} accepts a user provided incidence dataframe and uses that along with the user provided population and generation time, Tg, (and if relevant the latent period sigma) to fit the incidence data.  Additionally, when specified by the user, \code{runDRAFT} will also generate a forecast for the incidence.
+#' Data cadence is arbitrary but at most can be monthly.
+#' We support S-I-R and S-E-I-R models for a single population with a fixed (non-time-dependent) force of infection.
 #' @param inc_data Dataframe containing incidence data.  Must contain 'date' and 'cases' columns.  The 'date' column must either be Date-class or convert to Date-class using as.Date(inc_data$date, format="\%Y-\%m-\%d").
 #' @param Tg Numeric, generation time in days. Default is 3 days
 #' @param pop Integer population of the region for which incidence is provided
