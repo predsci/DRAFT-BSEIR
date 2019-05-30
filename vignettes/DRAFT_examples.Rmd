@@ -25,7 +25,7 @@ This example fits an SIR model to 2017-2018 San Diego County laboratory-confirme
 
 ```{r}
 library(DRAFT)
-# San Diego 2017-2018 data is included in package as 
+# San Diego 2017-2018 data is included in the package as 
 # 'incidence_data1'
 head(incidence_data1)
 
@@ -64,20 +64,25 @@ We now do a fit to the data and then generate a forecast for the following weeks
 
 
 ```{r}
-# San Diego 2013-2014 data is included in package as 'incidence_data2'
+# San Diego 2013-2014 data is included in the package as 
+# 'incidence_data2'
 head(incidence_data2)
 
-# notice the additional dates at the end of the dataframe with cases=NA.  DRAFT will use the non-NA points to fit a model and then run the model forward to create a forecast for all NA entries.
+# notice the additional dates at the end of the dataframe with 
+# cases=NA.  DRAFT will use the non-NA points to fit a model 
+# and then run the model forward to create a forecast for all 
+# NA entries.
 incidence_data2[28:41, ]
 
 # we will fit data to an SIR model (no behavior terms).
-# 1 - SIR, 2 - SEIR, 3 - behavior SIR 
+# 1-SIR, 2-SEIR, 3-behavior SIR 
 epi_model = 1
 # the population is about 3 million
 pop = 3e6
 # Set disease generation time in days
 Tg = 2.6
-# latent period in days - needed only for SEIR model, epi_model = 2
+# latent period in days - needed only for SEIR model, 
+# epi_model = 2
 sigma = NULL
 # Parameters for behavior modification model only
 dp = dq = ts = dL = NULL
@@ -100,14 +105,15 @@ paste0("user_data_", Sys.Date(), "_Tg_", Tg, "/")
 This example fits an SIR model with behavior modification to 2014 Ebola data from Liberia.
 
 ```{r}
-# Liberia 2014 data is included in the DRAFT package as 'incidence_data3'. 
+# Liberia 2014 data is included in the DRAFT package 
+#as 'incidence_data3'. 
 head(incidence_data3)
 
 # No weeks are specified for forecasting
 tail(incidence_data3)
 
 # we will fit data to an SIR model with behavior terms.
-# 1 - SIR, 2 - SEIR, 3 - behavior SIR 
+# 1-SIR, 2-SEIR, 3-behavior SIR 
 epi_model = 3
 # the population is about 4 million
 pop = 4035777
@@ -115,11 +121,15 @@ pop = 4035777
 Tg = 12
 # latent period in days - needed only for SEIR model
 sigma = NULL
-# Setting the contact rate modifications for Susceptible and Infected to NULL will cause these parameters to be fit.
+# Setting the contact rate modifications for Susceptible 
+# and Infected to NULL will cause these parameters to be 
+# fit.
 dp = dq = NULL
-# Behavior modifications are known to have commenced at the end of July 2014.
+# Behavior modifications are known to have commenced at 
+# the end of July 2014.
 ts = as.Date("2014-07-30")
-# It took approximately 20 days for the changes to fully take hold.
+# It took approximately 20 days for the changes to fully 
+# take hold.
 dL = 20
 ```
 
@@ -139,25 +149,34 @@ This example fits an SIR model with behavior modifications to 2014 Ebola data fr
 
 
 ```{r}
-# Liberia 2014 data is included in the DRAFT package as 'incidence_data4'. 
+# Liberia 2014 data is included in the DRAFT package 
+# as 'incidence_data4'. 
 head(incidence_data4)
 
-# Several weeks have been marked for forecasting (cases=NA)
+# Several weeks have been marked for 
+# forecasting (cases=NA)
 incidence_data4[34:40, ]
 
-# we will fit data to an SIR model with behavior terms.
-# 1 - SIR, 2 - SEIR, 3 - behavior SIR 
+# we will fit data to an SIR model with behavior 
+# terms. # 1-SIR, 2-SEIR, 3-behavior SIR 
 epi_model = 3
 # the population is about 4 million
 pop = 4035777
 # Set disease generation time in days
 Tg = 12
-# latent period in days - needed only for SEIR model, epi_model = 2
+# latent period in days - needed only for SEIR model, 
+#epi_model = 2
 sigma = NULL
-# When forecast periods are requested the contact rate modifications for Susceptible and Infected must be set by the user. These values indicate that the initial contact rate for susceptibles will be multiplied by a factor of 1-dp and the initial contact rate of infectious is multiplied by a factor of 1-dq.
+# When forecast periods are requested the contact rate 
+# modifications for Susceptible and Infected must be set 
+# by the user. These values indicate that the initial 
+# contact rate for susceptibles will be multiplied by a 
+# factor of 1-dp and the initial contact rate of infectious 
+# is multiplied by a factor of 1-dq.
 dp = 0.002
 dq = 0.45
-# Behavior modifications are known to have commenced at the end of July 2014.
+# Behavior modifications are known to have commenced at 
+# the end of July 2014.
 ts = as.Date("2014-07-30")
 # It took approximately 20 days for the changes to fully take hold.
 dL = 20
@@ -180,17 +199,19 @@ This example is similar to example 3 except it fits an SEIR model to 2014 Ebola 
 
 
 ```{r}
-# Liberia 2014 data is included in the DRAFT package as 'incidence_data4'. 
+# Liberia 2014 data is included in the DRAFT package 
+# as 'incidence_data4'. 
 head(incidence_data3)
 
 # we will fit data to an SIR model with behavior terms.
-# 1 - SIR, 2 - SEIR, 3 - behavior SIR 
+# 1-SIR, 2-SEIR, 3-behavior SIR 
 epi_model = 2
 # the population is about 4 million
 pop = 4035777
 # Set disease generation time in days
 Tg = 17
-# latent period in days - needed only for SEIR model, epi_model = 2
+# latent period in days - needed only for SEIR 
+# model, epi_model = 2
 sigma = 5
 # Parameters for behavior modification model only
 dp = dq = ts = dL = NULL
