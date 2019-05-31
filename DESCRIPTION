@@ -9,7 +9,7 @@ Author: Michal Ben-Nun <mbennun@predsci.com> [aut],
 	James Turtle <jturtle@predsci.com> [cre],
 	Pete Riley <pete@predsci.com> [ctb]
 Maintainer: James Turtle <jturtle@predsci.com>
-Description: Using an MCMC procedure, fit an SIR, SEIR or behavior modification SIR model 	to user-provided incidence data.
+Description: Using an Markov Chain Monte Carlo (MCMC) procedure, fit and forecast user-provided incidence data using an SIR, SEIR or behavior-modification-SIR model.  User may set behavior modification parameters or have the model fit them to the data.  The package works with arbitrary data cadence with an upper limit of monthly (incidence reporting periods must not be greater than months).
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

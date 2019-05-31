@@ -15,11 +15,10 @@ knitr::opts_chunk$set(
 ```
 
 
-## Examples
-This document contains a series of examples using the runDRAFT() function.  The objectives of these examples are to demonstrate the requied format of input incidence data and show how varying inputs activate different models and forecasts.
+This document contains a series of examples using the `runDRAFT()` function.  The objective of these examples is to demonstrate the requied format of input incidence data and show how varying input parameters activates different models and forecasts.
 
 ### Example 1
-This example fits an SIR model to 2017-2018 San Diego County laboratory-confirmed cases of influenza.  
+This example fits an SIR model to weekly 2017-2018 San Diego County laboratory-confirmed cases of influenza.  
 
 
 
@@ -44,7 +43,7 @@ dp = dq = ts = dL = NULL
 
 ```
 
-To run DRAFT, execute the following line in an R console.  It will take a minute or two to execute the MCMC fitting procedure.  The function will create a subdirectory of the current working directory and save the resulting .RData and .png files there.  For more details see the runDRAFT help page \code{?runDRAFT}.
+To run DRAFT, execute the following line in an R console.  It will take a minute or two to execute the MCMC fitting procedure.  The function will create a subdirectory of the current working directory and save the resulting .RData and .png files there.  For more details see the runDRAFT help page `?runDRAFT`.
 
 ```{r, eval=F}
 results <- runDRAFT(inc_data=incidence_data1, epi_model=epi_model, pop=pop, Tg=Tg, dp=dp, dq=dq, ts=ts, dL=dL)
@@ -54,9 +53,23 @@ results <- runDRAFT(inc_data=incidence_data1, epi_model=epi_model, pop=pop, Tg=T
 paste0("user_data_", Sys.Date(), "_Tg_", Tg, "/")
 ```
 
+\  
+\  
+\  
+The first png generated is simply user-provided data.  In this case, that is weekly San Diego County influenza data for the 2017-2018 season.
+![San Diego County 2017-2018 weekly influenza](images/user_data-incidence_ex1.png)
+
+\  
+\  
+\  
+The second png is a results plot.  Here data is plotted in black, the model best fit (most likely) in green, and the model mean fit in blue.  Additionally, a subset of MCMC profiles are plotted in red.  The resulting red shading helps to visualize the probability density of the MCMC chain.  In the histograms below we see the MCMC chain parameter distributions for basic reproduction number $R_0$ and percent clinical $p_C$.  $p_C$ is defined as the percent of infectious that visit a clinic, but in this case also scales the population to the effective population served by reporting clinics.  For this reason, $p_C$ values may be lower than expected.
+
+![Results plot from example 1](images/results-user_data_ex1.png)
+
 <!-- ![Results from Example 1.](`paste0("user_data_", Sys.Date(), "_Tg_2.6")`) -->
 <!-- ![Results from Example 1.](user_data_2019-05-02_Tg_2.6/results-user_data-42.png) -->
-
+\  
+\  
 
 
 ### Example 2
@@ -89,7 +102,7 @@ dp = dq = ts = dL = NULL
 
 ```
 
-To run DRAFT, execute the following line in an R console.  It will take a minute or two to execute the MCMC fitting procedure.  The function will create a subdirectory of the current working directory and save the resulting .RData and .png files there.  For more details see the runDRAFT help page \code{?runDRAFT}.
+To run DRAFT, execute the following line in an R console.  It will take a minute or two to execute the MCMC fitting procedure.  The function will create a subdirectory of the current working directory and save the resulting .RData and .png files there.  For more details see the runDRAFT help page `?runDRAFT`.
 
 ```{r, eval=F}
 results <- runDRAFT(inc_data=incidence_data2, epi_model=epi_model, pop=pop, Tg=Tg, dp=dp, dq=dq, ts=ts, dL=dL)
@@ -100,6 +113,21 @@ paste0("user_data_", Sys.Date(), "_Tg_", Tg, "/")
 ```
 
 
+\  
+\  
+\  
+
+![San Diego County 2013-2014 weekly influenza](images/user_data-incidence_ex2.png)
+
+\  
+\  
+\  
+In this example, we have a forecast in addition to model fit.  Purple shading denotes future/forecast weeks and includes the mean and best profile forecasts.
+
+![Results plot from example 2](images/results-user_data_ex2.png)
+
+\  
+\  
 
 ### Example 3
 This example fits an SIR model with behavior modification to 2014 Ebola data from Liberia.
@@ -133,7 +161,7 @@ ts = as.Date("2014-07-30")
 dL = 20
 ```
 
-To run DRAFT, execute the following line in an R console.  It will take a minute or two to execute the MCMC fitting procedure.  The function will create a subdirectory of the current working directory and save the resulting .RData and .png files there.  For more details see the runDRAFT help page \code{?runDRAFT}.
+To run DRAFT, execute the following line in an R console.  It will take a minute or two to execute the MCMC fitting procedure.  The function will create a subdirectory of the current working directory and save the resulting .RData and .png files there.  For more details see the runDRAFT help page `?runDRAFT`.
 
 ```{r, eval=F}
 results <- runDRAFT(inc_data=incidence_data3, epi_model=epi_model, pop=pop, Tg=Tg, dp=dp, dq=dq, ts=ts, dL=dL)
@@ -143,6 +171,22 @@ results <- runDRAFT(inc_data=incidence_data3, epi_model=epi_model, pop=pop, Tg=T
 paste0("user_data_", Sys.Date(), "_Tg_", Tg, "/")
 ```
 
+
+\  
+\  
+\  
+
+![Liberia 2014 ebola data](images/user_data-incidence_ex3.png)
+
+\  
+\  
+\  
+In this example we specified when behavior changes were initiated and how long they took to take full effect.  Then the model fit the effectiveness of the behavior changes.  This plot shows the data (black) and resulting fit (blue, green, magenta) as well as fractional contact rates for Infectious (yellow/orange) and Suseptibles (red).  In the histograms below we see the MCMC chain parameter distributions for basic reproduction number $R_0$, Susceptible fractional contact rate $p$, and Infectious fractional contact rate $q$.
+
+![Results plot from example 3](images/results-user_data_ex3.png)
+
+\  
+\  
 
 ### Example 4
 This example fits an SIR model with behavior modifications to 2014 Ebola data from Liberia and forecasts the following weeks.
@@ -182,7 +226,7 @@ ts = as.Date("2014-07-30")
 dL = 20
 ```
 
-To run DRAFT, execute the following line in an R console.  It will take a minute or two to execute the MCMC fitting procedure.  The function will create a subdirectory of the current working directory and save the resulting .RData and .png files there.  For more details see the runDRAFT help page \code{?runDRAFT}.
+To run DRAFT, execute the following line in an R console.  It will take a minute or two to execute the MCMC fitting procedure.  The function will create a subdirectory of the current working directory and save the resulting .RData and .png files there.  For more details see the runDRAFT help page `?runDRAFT`.
 
 ```{r, eval=F}
 results <- runDRAFT(inc_data=incidence_data4, epi_model=epi_model, pop=pop, Tg=Tg, dp=dp, dq=dq, ts=ts, dL=dL)
@@ -193,6 +237,21 @@ paste0("user_data_", Sys.Date(), "_Tg_", Tg, "/")
 ```
 
 
+\  
+\  
+\  
+
+![Liberia 2014 ebola data](images/user_data-incidence_ex4.png)
+
+\  
+\  
+\  
+In this example we specified all behavior change parameters and requested a forecast of future weeks.  This plot shows the data (black), resulting fit (blue, green, magenta), forecast (purple shading), fractional contact rates for Infectious (yellow/orange), and fractional contact rates for Suseptibles (red).  In the histograms below we see the MCMC chain parameter distributions for basic reproduction number $R_0$, suggesting that $R_0$ was quite high (approx 2.5) prior to the behavior modifications.
+
+![Results plot from example 4](images/results-user_data_ex4.png)
+
+\  
+\  
 
 ### Example 5
 This example is similar to example 3 except it fits an SEIR model to 2014 Ebola data from Liberia.
@@ -217,7 +276,7 @@ sigma = 5
 dp = dq = ts = dL = NULL
 ```
 
-To run DRAFT, execute the following line in an R console.  It will take a minute or two to execute the MCMC fitting procedure.  The function will create a subdirectory of the current working directory and save the resulting .RData and .png files there.  For more details see the runDRAFT help page \code{?runDRAFT}.
+To run DRAFT, execute the following line in an R console.  It will take a minute or two to execute the MCMC fitting procedure.  The function will create a subdirectory of the current working directory and save the resulting .RData and .png files there.  For more details see the runDRAFT help page `?runDRAFT`.
 
 ```{r, eval=F}
 results <- runDRAFT(inc_data=incidence_data3, epi_model=epi_model, pop=pop, Tg=Tg, dp=dp, dq=dq, ts=ts, dL=dL)
@@ -227,3 +286,20 @@ results <- runDRAFT(inc_data=incidence_data3, epi_model=epi_model, pop=pop, Tg=T
 # view results in subdirectory
 paste0("user_data_", Sys.Date(), "_Tg_", Tg, "/")
 ```
+
+\  
+\  
+\  
+
+![Liberia 2014 ebola data](images/user_data-incidence_ex5.png)
+
+\  
+\  
+\  
+
+This example fits 2014 ebola data using an SEIR model.  The resulting fit and parameter distributions are illustrated below.
+
+![Results plot from example 4](images/results-user_data_ex5.png)
+
+\  
+\
