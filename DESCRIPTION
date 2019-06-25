@@ -9,7 +9,7 @@ Author: Michal Ben-Nun <mbennun@predsci.com> [aut],
 	James Turtle <jturtle@predsci.com> [cre],
 	Pete Riley <pete@predsci.com> [ctb]
 Maintainer: James Turtle <jturtle@predsci.com>
-Description: Using an Markov Chain Monte Carlo (MCMC) procedure, fit and forecast user-provided incidence data using an SIR, SEIR or behavior-modification-SIR model.  User may set behavior modification parameters or have the model fit them to the data.  The package works with arbitrary data cadence with an upper limit of monthly (incidence reporting periods must not be greater than months).
+Description: The DRAFT package calculates stochastic epidemic profiles with constant or time-dependent behavior modification parameters. Two parameters, p and q, describe the effect of reduced contact rate of the susceptible and infectious populations, respectively. In the absence of behavior modification p=q=1 and we recover the familiar compartmental SIR equations. DRAFT supports both constant values for p and q and a time-dependent form which smoothly changes p and q from their initial, pre-epidemic value of 1.0 to the user chosen values that are between 0 and 1. The start and transient time of behavior change are set by the user. DRAFT can be used to compare forecasts of epidemic incidence with and without behavior modification.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -19,12 +19,9 @@ Imports:
     utils,
     tools,
     coda,
-    MASS,
-    plotly,
     gridExtra,
     ggplot2,
     reshape,
-    dplyr,
     lubridate (>= 1.7.0)
 RoxygenNote: 6.1.1
 Suggests: 

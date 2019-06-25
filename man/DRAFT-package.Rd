@@ -6,10 +6,10 @@
 \alias{DRAFT-package}
 \title{DRAFT: Disease Rapid Analysis and Forecasting Tool}
 \description{
-Using an MCMC procedure, fit an SIR, SEIR or behavior modification SIR model 	to user-provided incidence data.
+The DRAFT package calculates stochastic epidemic profiles with constant or time-dependent behavior modification parameters. Two parameters, p and q, describe the effect of reduced contact rate of the susceptible and infectious populations, respectively. In the absence of behavior modification p=q=1 and we recover the familiar compartmental SIR equations. DRAFT supports both constant values for p and q and a time-dependent form which smoothly changes p and q from their initial, pre-epidemic value of 1.0 to the user chosen values that are between 0 and 1. The start and transient time of behavior change are set by the user. DRAFT can be used to compare forecasts of epidemic incidence with and without behavior modification.
 }
 \details{
-The primary function that a user will need is runbSEIR().  This function expects the user to input an incidence data.frame with columns 'date' and 'cases'.  For non-uniform reporting, the code assumes that the reporting period for the nth row runs from the date[n-1]+1 to date[n].  The 'date' column class should be "Date".
+The primary function that a user will need is runDRAFT().  See \code{\link{runDRAFT}} for more details.
 }
 \author{
 \strong{Maintainer}: James Turtle \email{jturtle@predsci.com}

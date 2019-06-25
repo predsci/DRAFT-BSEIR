@@ -29,10 +29,10 @@ runDRAFT(inc_data = NULL, pop = 10000, epi_model = 1, Tg = 3,
 \value{
 A list with the input and entire output of the run.  List entries:
   \itemize{
-    \item \emph{$mydata}: A data structure containing the input data.
-    \item \emph{$rtn}: The best-fit profile.
-    \item \emph{$profile}: The full MCMC distribution of incidence profiles as a matrix. 
-    \item \emph{$tab}: The full MCMC distribution of parameters as a matrix.
+    \item \emph{mydata}: A data structure containing the input data.
+    \item \emph{rtn}: The best-fit profile.
+    \item \emph{profile}: The full MCMC distribution of incidence profiles as a matrix. 
+    \item \emph{tab}: The full MCMC distribution of parameters as a matrix.
   }
   Additional output is written to a subdirectory 'user_data_*' within the current working directory.  File list:
   \itemize{
@@ -51,6 +51,8 @@ We support S-I-R and S-E-I-R models for a single population with a fixed (non-ti
 Data fitting is done using a Markov Chain Monte Carlo (MCMC) procedure.  While generally discussed in the context of optimization, this procedure results in a mapping of the objective distribution.  Thus the results of runDRAFT() come in the form of a distribution of parameters and the resulting distribution of incidence profiles.
 }
 \examples{
+# See examples vignette for more a more in-depth walkthrough.
+vignette("DRAFT_examples")
 # Run an SEIR model using the incidence file and assuming a population of 1 million people.
 # The generation time and latent period are set to 2.6 days and 3 days respectively
 head(incidence_data2)
