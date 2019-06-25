@@ -9,7 +9,7 @@
 The DRAFT package calculates stochastic epidemic profiles with constant or time-dependent behavior modification parameters. Two parameters, p and q, describe the effect of reduced contact rate of the susceptible and infectious populations, respectively. In the absence of behavior modification p=q=1 and we recover the familiar compartmental SIR equations. DRAFT supports both constant values for p and q and a time-dependent form which smoothly changes p and q from their initial, pre-epidemic value of 1.0 to the user chosen values that are between 0 and 1. The start and transient time of behavior change are set by the user. DRAFT can be used to compare forecasts of epidemic incidence with and without behavior modification.
 }
 \details{
-The primary function that a user will need is runDRAFT().  See \code{\link{runDRAFT}} for more details.
+The primary function that a user will need is runDRAFT().  See \code{\link{runDRAFT}} for more details.  Also, see the vignette \code{vignette("DRAFT_examples")} for some examples.
 }
 \author{
 \strong{Maintainer}: James Turtle \email{jturtle@predsci.com}
