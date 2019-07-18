@@ -1,12 +1,12 @@
-# assumes that the DRAFT repository is in ~/GitReps/DRAFT_CRAN/
+# assumes that the DRAFT repository is in ~/GitReps/DRAFT/
 
 # first build the package
 cd ~/GitReps
-R CMD build --compact-vignette=qpdf DRAFT_CRAN
+R CMD build --compact-vignettes DRAFT
 
 # Run R-devel CMD check on the resulting tar.gz file
 # my install of R-devel is located at ~/R-devel/
-~/R-devel/bin/R CMD check --as-cran DRAFT_0.1.0.tar.gz
+~/R-devel/bin/R CMD check --as-cran DRAFT_0.3.0.tar.gz
 
 
 

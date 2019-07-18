@@ -18,6 +18,8 @@
 #' @param dq Proportion of infectious contact rate (0-1) following behavior modification.  If infectious cases reduce their contacts by one half, set \code{dq=0.5}.  Only used if inc_data requires a forecast.
 #' @param ts Date class.  Start date of behavior modification.
 #' @param dL Number of days for behavior modification to completely take effect.
+#' @param out_dir Character string containing file path for output images and data files.  If not specified, DRAFT will not generate output images or files.
+#' @param nMCMC Number of steps to take in the Markov Chain Monte Carlo (MCMC) process.  Number of steps needed for a good 'fit' will vary from case-to-case, but should never be less than 1e4.
 #' @return A list with the input and entire output of the run.  List entries:
 #'   \itemize{
 #'     \item \emph{mydata}: A data structure containing the input data.
@@ -34,117 +36,141 @@
 #'   }
 #' @details Data fitting is done using a Markov Chain Monte Carlo (MCMC) procedure.  While generally discussed in the context of optimization, this procedure results in a mapping of the objective distribution.  Thus the results of runDRAFT() come in the form of a distribution of parameters and the resulting distribution of incidence profiles.
 #' @examples
-#' # See examples vignette for more a more in-depth walkthrough.
+#' # See examples vignette for a more in-depth walkthrough.
 #' vignette("DRAFT_examples")
-#' # Run an SEIR model using the incidence file and assuming a population of 1 million people.
-#' # The generation time and latent period are set to 2.6 days and 3 days respectively
+#' # Run an SEIR model using the incidence file and assuming a 
+#' # population of 1 million people.
+#' # The generation time and latent period are set to 2.6 days 
+#' # and 3 days respectively
 #' head(incidence_data2)
-#' \dontrun{output <- runDRAFT(inc_data=incidence_data2, pop = 1e6, 
-#' epi_model = 2, Tg = 2.6, sigma = 3.)}
+#' temp_write = tempdir()
+#' \donttest{output <- runDRAFT(inc_data=incidence_data2, out_dir=temp_write,
+#'  pop = 1e6, epi_model = 2, Tg = 2.6, sigma = 3.)}
+#' \dontshow{output <- runDRAFT(inc_data=incidence_data2, out_dir=temp_write,
+#'  pop = 1e6, epi_model = 2, Tg = 2.6, sigma = 3., nMCMC=1000)}
 #'
-#' # Run an SIR model using the incidence file and assuming a population of 10,000 people.
-#' # The generation time is set to 3 days. (No need to define a latent period.)
+#' # Run an SIR model using the incidence file and assuming a 
+#' # population of 10,000 people.
+#' # The generation time is set to 3 days. (No need to define 
+#' # a latent period.)
 #' head(incidence_data1)
-#' \dontrun{output <- runDRAFT(inc_data=incidence_data2, pop = 1e5, epi_model = 1, Tg = 3.)}
+#' \donttest{output <- runDRAFT(inc_data=incidence_data2, out_dir=temp_write,
+#'  pop = 1e5, epi_model = 1, Tg = 3.)}
+#' \dontshow{output <- runDRAFT(inc_data=incidence_data2, out_dir=NULL,
+#'  pop = 1e5, epi_model = 1, Tg = 3., nMCMC=100)}
 #'
 #' @export
 runDRAFT <- function(inc_data=NULL,
-           pop = 1e4,
-           epi_model = 1,
-           Tg = 3,
-           sigma = NULL,
-           dp = NULL,
-           dq = NULL,
-           ts = NULL,
-           dL = NULL) {
-    
-
-    ## Set the MCMC parameters
-
-    # nMCMC = 1e6
-    nMCMC = 1e4
-    # nlines = 1e
-    nlines = 1e3
-    plot = 1
-
-    device = 'png'
-
+                     out_dir=NULL,
+                     pop = 1e4,
+                     epi_model = 1,
+                     Tg = 3,
+                     sigma = NULL,
+                     dp = NULL,
+                     dq = NULL,
+                     ts = NULL,
+                     dL = NULL,
+                     nMCMC = 1e4) {
+  
+  
+  ## Set the MCMC parameters
+  
+  # nMCMC = 1e6
+  # nMCMC = 1e4
+  # nlines = 1e
+  nlines = 1e3
+  if (nMCMC < nlines) {
+    nlines = floor(nMCMC/2)
+  }
+  plot = 1
+  
+  device = 'png'
+  
+  # if no outdir specified, warn user that results images will not be made
+  if (is.null(out_dir)) {
+    cat("Warning. Output directory 'out_dir' has not been specified.  DRAFT will not produce output images or files.")
+    write_out = FALSE
+  } else {
+    write_out = TRUE
+  }
+  
   # check that inc_data is in proper format
-    if (is.data.frame(inc_data)) {
-      if (all(c("date", "cases") %in% names(inc_data))) {
-        if (class(inc_data$date)=="Date") {
-          if (all(diff(inc_data$date)>0)) {
-            # inc_data is properly formatted, proceed
-          } else {
-            # re-order data chronologically
-            cat("Warning. The dates of 'inc_data' are not in chronological order.  Re-ordering rows now.\n")
-            inc_data = inc_data[order(inc_data$date), ]
-          }
+  if (is.data.frame(inc_data)) {
+    if (all(c("date", "cases") %in% names(inc_data))) {
+      if (class(inc_data$date)=="Date") {
+        if (all(diff(inc_data$date)>0)) {
+          # inc_data is properly formatted, proceed
         } else {
-          inc_data$date = as.Date(inc_data$date)
+          # re-order data chronologically
+          cat("Warning. The dates of 'inc_data' are not in chronological order.  Re-ordering rows now.\n")
+          inc_data = inc_data[order(inc_data$date), ]
         }
       } else {
-        stop("inc_data must have columns 'date' and 'cases'.\n")
+        inc_data$date = as.Date(inc_data$date)
       }
     } else {
-      stop("inc_data must be of class data.frame.\n")
+      stop("inc_data must have columns 'date' and 'cases'.\n")
     }
-    
-    
-    
-	## Since the tanh changes on a time span that is ~ x 2 dL we divide by 2 here 
-	
-	if(!is.null(dL)) dL = dL/2
-	
-   # Build the mydata list
-
-   mydata <- build.mydata(inc_data=inc_data, pop = pop, epi_model = epi_model, Tg = Tg, sigma = sigma, dp = dp, dq = dq, ts = ts, dL = dL)
-   
-   #
-   # Build a name for the sub-directory that will hold the results
-   #
-   myName = Sys.Date()
-   myName = gsub(" ", "-", myName)
-   if (is.null(sigma)) {
-   	subDir = paste0(mydata$model$name, "_", myName, "_Tg_", Tg)
-	} else {
-	subDir = paste0(mydata$model$name, "_", myName, "_Tg_", Tg,"_sigma_",sigma)	
-	}
-	
-	## If directory exists rename it by appending current time to its name
-	if(dir.exists(subDir)) {
-		oldDir = subDir
-		oldDir = paste0(oldDir,"-",Sys.time())
-		oldDir = myName = gsub(" ", "-", oldDir)
-		err = file.rename(from = subDir, to = oldDir)
-		cat("\n Renaming Previous Directory From:", subDir, " to ", oldDir, '\n\n')
-		
-	}
-	subDir = paste0(subDir,'/')
-   mydata$subDir = subDir
-
-	## Create a directory for the run
-	
-   	dir.create(subDir)
-
-   # Plot the incidence - there is no historic data
-
-   err <- plot_disease(mydata = mydata, device = device)
-
-   ##
-   ## Mechanistic Modeling
-   ## Pack the information for the run
-
-   par_names <- set.user.data.param.list(epi_model = epi_model)
-
-   opt.list <- set.user.data.opt.list(mydata = mydata)
-
-   run.list <- set.run.list(nMCMC = nMCMC, nlines = nlines, device = device, subDir = mydata$subDir)
-   ## Fit the data
-
-   output <- fit.user.data(mydata = mydata, par_names = par_names, opt.list = opt.list, run.list = run.list)
-   return(output)
-
+  } else {
+    stop("inc_data must be of class data.frame.\n")
+  }
+  
+  
+  
+  ## Since the tanh changes on a time span that is ~ x 2 dL we divide by 2 here 
+  
+  if(!is.null(dL)) dL = dL/2
+  
+  # Build the mydata list
+  
+  mydata <- build.mydata(inc_data=inc_data, pop = pop, epi_model = epi_model, Tg = Tg, sigma = sigma, dp = dp, dq = dq, ts = ts, dL = dL)
+  
+  #
+  # Build a name for the sub-directory that will hold the results
+  #
+  myName = Sys.Date()
+  myName = gsub(" ", "-", myName)
+  if (is.null(sigma)) {
+    subDir = paste0(mydata$model$name, "_", myName, "_Tg_", Tg)
+  } else {
+    subDir = paste0(mydata$model$name, "_", myName, "_Tg_", Tg,"_sigma_",sigma)	
+  }
+  
+  ## If directory already exists rename new dir by appending current time to its name
+  use_dir = paste0(out_dir, "/", subDir)
+  if(dir.exists(use_dir) & write_out) {
+    oldDir = use_dir
+    use_dir = paste0(use_dir, "-", Sys.time())
+    cat("\n Renaming Write Directory From:", oldDir, " to ", use_dir, '\n\n')
+  }
+  use_dir = paste0(use_dir,'/')
+  mydata$subDir = use_dir
+  
+  ## Create a directory for the run
+  if (write_out) {
+    dir.create(use_dir)
+  }
+  
+  
+  # Plot the incidence - there is no historic data
+  if (write_out) {
+    err <- plot_disease(mydata = mydata, device = device)
+  }
+  
+  ##
+  ## Mechanistic Modeling
+  ## Pack the information for the run
+  
+  par_names <- set.user.data.param.list(epi_model = epi_model)
+  
+  opt.list <- set.user.data.opt.list(mydata = mydata)
+  
+  run.list <- set.run.list(nMCMC = nMCMC, nlines = nlines, device = device, subDir = mydata$subDir)
+  ## Fit the data
+  
+  output <- fit.user.data(mydata = mydata, par_names = par_names, opt.list = opt.list, run.list = run.list, write_out=write_out)
+  return(output)
+  
 }
 
 
@@ -658,7 +684,8 @@ set.imask <- function(par_names = NULL, opt.list = NULL) {
 fit.user.data <- function(mydata = NULL,
            par_names = NULL,
            opt.list = NULL,
-           run.list = NULL) {
+           run.list = NULL,
+           write_out = FALSE) {
 
 
 	tps = cumsum(mydata$ndays)
@@ -722,31 +749,19 @@ fit.user.data <- function(mydata = NULL,
 	##
 	if (mydata$epi_model == 1) {
 		cat("\n\n Fitting S-I-R model to User Data \n\n")
-		out <- .Fortran("fitsir", epi = as.double(cases), gamaepi = as.double(gamaepi), wght = as.double(wght), nparam = as.integer(nparam), par = as.double(par), parmin = as.double(pmin),
-			parmax = as.double(pmax), step = as.double(dx), ilog = as.integer(logvec),
-			Temp = as.double(mydata$Temp), imask = as.integer(imask), iseed = as.integer(iseed), nsamps = as.integer(nMCMC), ithin = as.integer(ithin), nperiods = as.integer(nperiods), tps = as.double(tps), rtn = as.double(rep(0, nperiods)), pois = as.double(pois), ndays = as.integer(ndays), nRrnd = as.integer(nRnd),
-			tab = as.single(tab), profile = as.single(profile), PACKAGE="DRAFT")
+		out <- .Fortran("fitsir", epi = as.double(cases), gamaepi = as.double(gamaepi), wght = as.double(wght), nparam = as.integer(nparam), par = as.double(par), parmin = as.double(pmin), parmax = as.double(pmax), step = as.double(dx), ilog = as.integer(logvec), Temp = as.double(mydata$Temp), imask = as.integer(imask), iseed = as.integer(iseed), nsamps = as.integer(nMCMC), ithin = as.integer(ithin), nperiods = as.integer(nperiods), tps = as.double(tps), rtn = as.double(rep(0, nperiods)), pois = as.double(pois), ndays = as.integer(ndays), nRrnd = as.integer(nRnd), tab = as.single(tab), profile = as.single(profile), PACKAGE="DRAFT")
 
 	} else if (mydata$epi_model == 2) {
 		cat("\n\n Fitting S-E-I-R model to User Data \n\n")
-		out <- .Fortran("fitseir", epi = as.double(cases), gamaepi = as.double(gamaepi), wght = as.double(wght), nparam = as.integer(nparam), par = as.double(par), parmin = as.double(pmin),
-			parmax = as.double(pmax), step = as.double(dx), ilog = as.integer(logvec),
-			Temp = as.double(mydata$Temp), imask = as.integer(imask), iseed = as.integer(iseed), nsamps = as.integer(nMCMC), ithin = as.integer(ithin), nperiods = as.integer(nperiods), tps = as.double(tps), rtn = as.double(rep(0, nperiods)), pois = as.double(pois), ndays = as.integer(ndays), nRrnd = as.integer(nRnd),
-			tab = as.single(tab), profile = as.single(profile), PACKAGE="DRAFT")
+		out <- .Fortran("fitseir", epi = as.double(cases), gamaepi = as.double(gamaepi), wght = as.double(wght), nparam = as.integer(nparam), par = as.double(par), parmin = as.double(pmin), parmax = as.double(pmax), step = as.double(dx), ilog = as.integer(logvec), Temp = as.double(mydata$Temp), imask = as.integer(imask), iseed = as.integer(iseed), nsamps = as.integer(nMCMC), ithin = as.integer(ithin), nperiods = as.integer(nperiods), tps = as.double(tps), rtn = as.double(rep(0, nperiods)), pois = as.double(pois), ndays = as.integer(ndays), nRrnd = as.integer(nRnd), tab = as.single(tab), profile = as.single(profile), PACKAGE="DRAFT")
 
 	}  else if (mydata$epi_model == 3) {
 		cat("\n\n Fitting Behavior Modification S-I-R model to User Data \n\n")
-		out <- .Fortran("fitbsir", epi = as.double(cases), gamaepi = as.double(gamaepi), wght = as.double(wght), nparam = as.integer(nparam), par = as.double(par), parmin = as.double(pmin),
-			parmax = as.double(pmax), step = as.double(dx), ilog = as.integer(logvec),
-			Temp = as.double(mydata$Temp), imask = as.integer(imask), iseed = as.integer(iseed), nsamps = as.integer(nMCMC), ithin = as.integer(ithin), nperiods = as.integer(nperiods), tps = as.double(tps), rtn = as.double(rep(0, nperiods)), pois = as.double(pois), ndays = as.integer(ndays), nRrnd = as.integer(nRnd),
-			tab = as.single(tab), profile = as.single(profile), PACKAGE="DRAFT")
+		out <- .Fortran("fitbsir", epi = as.double(cases), gamaepi = as.double(gamaepi), wght = as.double(wght), nparam = as.integer(nparam), par = as.double(par), parmin = as.double(pmin), parmax = as.double(pmax), step = as.double(dx), ilog = as.integer(logvec), Temp = as.double(mydata$Temp), imask = as.integer(imask), iseed = as.integer(iseed), nsamps = as.integer(nMCMC), ithin = as.integer(ithin), nperiods = as.integer(nperiods), tps = as.double(tps), rtn = as.double(rep(0, nperiods)), pois = as.double(pois), ndays = as.integer(ndays), nRrnd = as.integer(nRnd), tab = as.single(tab), profile = as.single(profile), PACKAGE="DRAFT")
 
 	} else {
 		cat("\n\n Fitting S-I-R model to User Data \n\n")
-		out <- .Fortran("fitsir", epi = as.double(cases), gamaepi = as.double(gamaepi), wght = as.double(wght), nparam = as.integer(nparam), par = as.double(par), parmin = as.double(pmin),
-			parmax = as.double(pmax), step = as.double(dx), ilog = as.integer(logvec),
-			Temp = as.double(mydata$Temp), imask = as.integer(imask), iseed = as.integer(iseed), nsamps = as.integer(nMCMC), ithin = as.integer(ithin), nperiods = as.integer(nperiods), tps = as.double(tps), rtn = as.double(rep(0, nperiods)), pois = as.double(pois), ndays = as.integer(ndays), nRrnd = as.integer(nRnd),
-			tab = as.single(tab), profile = as.single(profile), PACKAGE="DRAFT")
+		out <- .Fortran("fitsir", epi = as.double(cases), gamaepi = as.double(gamaepi), wght = as.double(wght), nparam = as.integer(nparam), par = as.double(par), parmin = as.double(pmin), parmax = as.double(pmax), step = as.double(dx), ilog = as.integer(logvec), Temp = as.double(mydata$Temp), imask = as.integer(imask), iseed = as.integer(iseed), nsamps = as.integer(nMCMC), ithin = as.integer(ithin), nperiods = as.integer(nperiods), tps = as.double(tps), rtn = as.double(rep(0, nperiods)), pois = as.double(pois), ndays = as.integer(ndays), nRrnd = as.integer(nRnd),	tab = as.single(tab), profile = as.single(profile), PACKAGE="DRAFT")
 	}
 
 
@@ -760,19 +775,18 @@ fit.user.data <- function(mydata = NULL,
 
 	colnames(tab) = c(par_names, "AICc")
 	
-	# plot the results
-	
-	plotlist <- plot_results(rtn = rtn, profile = profile, tab = tab, mydata = mydata, device = device)
+	if (write_out) {
+	  # plot the results
+	  plotlist <- plot_results(rtn = rtn, profile = profile, tab = tab, mydata = mydata, device = device)
+	  
+	  ## Dump all the profiles we have to a file
+	  ##
+	  err <- write.profiles(mydata = mydata, rtn = rtn, profile = profile)
+	  
+	  ## Dump the MCMC parameters
+	  err <- write.mcmc(mydata = mydata, tab = tab, opt.list = opt.list, run.list = run.list, imask = imask)
+	}
 
-	## Dump all the profiles we have to a file
-	##
-	
-	err <- write.profiles(mydata = mydata, rtn = rtn, profile = profile)
-
-	## Dump the MCMC parameters
-	
-	err <- write.mcmc(mydata = mydata, tab = tab, opt.list = opt.list, run.list = run.list, imask = imask)
-	
 	## Build and return the results list
 	##
 	results = list(mydata = mydata, rtn = rtn, profile = profile, tab = tab)

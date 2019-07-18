@@ -6,11 +6,11 @@
 
       implicit none
       integer nparam, nopt, iopt(nopt)
-      real*8 curval(nparam),valmin(nparam),valmax(nparam)
-      real*8 parupdt(nparam),step(nparam)
-      real*8 x, rv, rtn
-      real*8 ran1
-      real*8 SR_to_unit, SR_from_unit
+      REAL(8) curval(nparam),valmin(nparam),valmax(nparam)
+      REAL(8) parupdt(nparam),step(nparam)
+      REAL(8) x, rv, rtn
+      REAL(8) ran1
+      REAL(8) SR_to_unit, SR_from_unit
       integer iseed
       integer i,j
       
@@ -57,7 +57,7 @@ c----------------------------------------------------------------
       function SR_to_unit(y,ymin,ymax,logflag)
 
       implicit none
-      real*8 y, ymin,ymax,rtn,SR_to_Unit
+      REAL(8) y, ymin,ymax,rtn,SR_to_Unit
       logical logflag
 
       if (logflag) Then
@@ -78,7 +78,7 @@ c----------------------------------------------------------------
       
       implicit none
    
-      real*8 x,ymin,ymax,rtn,SR_from_unit
+      REAL(8) x,ymin,ymax,rtn,SR_from_unit
       logical logflag
 
 
@@ -102,8 +102,8 @@ c----------------------------------------------------------------
         
         implicit none
         integer ndata,nstep, ndays
-        real*8 dsdt((ndays)*nstep)
-        real*8 x(ndata), pC, e_nonflu
+        REAL(8) dsdt((ndays)*nstep)
+        REAL(8) x(ndata), pC, e_nonflu
         integer i
         integer istart, iend
         integer imid((ndata+1))
@@ -129,9 +129,9 @@ C-------------------------------------------------------------------------------
         implicit none
 
         integer ndata, i
-        real*8 y(ndata),x(ndata), gamay(ndata)
-        real*8 wght(ndata)
-        real*8 xi, yi,sum,val,CalcFit1D
+        REAL(8) y(ndata),x(ndata), gamay(ndata)
+        REAL(8) wght(ndata)
+        REAL(8) xi, yi,sum,val,CalcFit1D
 
 
 c x is the simulated data
@@ -169,11 +169,11 @@ C calculate the P(yi,xi)
       implicit none
 
       integer nparam,ndata,iseed,iaccept,iadapt
-      real*8 fnewLLK, curLLK, curMin
-      real*8 curpars(nparam),savepar(nparam)
-      real*8 parBest(nparam)
-      real*8 rtn(ndata), rtnBest(ndata)
-      real*8 rnd,ran1,diff_LLK
+      REAL(8) fnewLLK, curLLK, curMin
+      REAL(8) curpars(nparam),savepar(nparam)
+      REAL(8) parBest(nparam)
+      REAL(8) rtn(ndata), rtnBest(ndata)
+      REAL(8) rnd,ran1,diff_LLK
       external ran1
       logical accept
 
@@ -224,8 +224,8 @@ C The Main Differential Equations- SIR model
       implicit none
 
       integer np, nc
-      REAL*8 pars(np)
-      REAL*8 Pop(nc), dPop(nc)
+      REAL(8) pars(np)
+      REAL(8) Pop(nc), dPop(nc)
 
 C
 C     The SIR differential equations
@@ -252,10 +252,10 @@ C The Main Differential Equations.
 
       SUBROUTINE derivSEIR(Param, Pop, dPop, np, nc)
 
-      implicit real*8(a-h,o-z)
+      implicit REAL(8)(a-h,o-z)
 
       integer np, nc
-      REAL*8 Param(np), Pop(nc), dPop(nc)
+      REAL(8) Param(np), Pop(nc), dPop(nc)
 
 C
 C     The differential equations-including source/sink term
@@ -283,7 +283,7 @@ C-------------------------------------------------------------------------------
 
       integer ndata,nstep
       integer imid((ndata+1))
-      real*8 tps(ndata)
+      REAL(8) tps(ndata)
       integer i
 
 ! Build the vector needed for calculating the incidence

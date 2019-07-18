@@ -14,24 +14,24 @@
       integer iseed, ndata,  nsamps, nparam
       integer ithin, ndays, nRnd
       integer ilog(nparam),imask(nparam)
-      real*8 epi(ndata), gamaEpi(ndata)
-      real*8 wght(ndata)
-      real*8 par(nparam)
-      real*8 parmin(nparam), parmax(nparam),step(nparam)
-      real*8 Temp
-      real*8 tps(ndata)
-      real*8 pC,e_bckgrnd
-      real*8 rtn(ndata)
+      REAL(8) epi(ndata), gamaEpi(ndata)
+      REAL(8) wght(ndata)
+      REAL(8) par(nparam)
+      REAL(8) parmin(nparam), parmax(nparam),step(nparam)
+      REAL(8) Temp
+      REAL(8) tps(ndata)
+      REAL(8) pC,e_bckgrnd
+      REAL(8) rtn(ndata)
       real  tab(nsamps/ithin,nparam+1)
       real  profiles(nRnd, ndata)
-      real*8 rtnBest(ndata),rtnNew(ndata)
-      real*8 dsdt((ndays)*nstep)
-      real*8 curpars(nparam),copypar(nparam),savepar(nparam)
-      real*8 savestep(nparam),parupdt(nparam),parBest(nparam)
-      real*8 curLLK, curMin
-      real*8 fnewLLK
-      real*8 ran1
-      real*8 accept_rate(nblock)
+      REAL(8) rtnBest(ndata),rtnNew(ndata)
+      REAL(8) dsdt((ndays)*nstep)
+      REAL(8) curpars(nparam),copypar(nparam),savepar(nparam)
+      REAL(8) savestep(nparam),parupdt(nparam),parBest(nparam)
+      REAL(8) curLLK, curMin
+      REAL(8) fnewLLK
+      REAL(8) ran1
+      REAL(8) accept_rate(nblock)
       logical plog(nparam)
       integer i, k, icount
       integer noptv, ioptv(nparam)
@@ -39,10 +39,10 @@
       integer iaccept(nblock)
       integer iadapt(nblock)
       integer imid((ndata+1))
-      real*8  range_min, range_max, scale, myaccept
-      real*8 step_max, step_min
-      real*8 calcFit1D
-      real*8 scaleNdata
+      REAL(8)  range_min, range_max, scale, myaccept
+      REAL(8) step_max, step_min
+      REAL(8) calcFit1D
+      REAL(8) scaleNdata
       integer ionep
       integer nlines, iline, iburn
       external calcFit1D,ran1
@@ -278,20 +278,20 @@
       integer iday_per_week, np, nc
       parameter (iday_per_week = 7, np = 3, nc = 4)
       integer ndata, nstep, ndays, nparam
-      real*8 curpars(nparam)
-      real*8 dt
-      real*8 t0, R0, Tg
-      real*8 fN
-c$$$      real*8 dsdt(ndata*nstep*iday_per_week)
-      real*8 dsdt((ndays)*nstep)
-      real*8 seed !initial number of infectious
-      real*8 tps(ndata) !time-series
-      real*8 tps2(0:(ndata+1))
-      real*8 y(nc), tmpY(nc)
-      real*8 dy1(nc), dy2(nc), dy3(nc), dy4(nc)
-      real*8 t_cur
-      real*8 p5, p3, p6
-      real*8 pars(np)
+      REAL(8) curpars(nparam)
+      REAL(8) dt
+      REAL(8) t0, R0, Tg
+      REAL(8) fN
+c$$$      REAL(8) dsdt(ndata*nstep*iday_per_week)
+      REAL(8) dsdt((ndays)*nstep)
+      REAL(8) seed !initial number of infectious
+      REAL(8) tps(ndata) !time-series
+      REAL(8) tps2(0:(ndata+1))
+      REAL(8) y(nc), tmpY(nc)
+      REAL(8) dy1(nc), dy2(nc), dy3(nc), dy4(nc)
+      REAL(8) t_cur
+      REAL(8) p5, p3, p6
+      REAL(8) pars(np)
 
       integer istep, iday
       integer icount, istart, iend

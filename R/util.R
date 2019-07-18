@@ -130,13 +130,14 @@ plot_disease <- function(mydata = NULL,  device = 'png') {
   xlab = " "
   title =  paste0("  User Provided Incidence: ", FY)
   
-  pl = ggplot2::ggplot(data = NULL) + ggplot2::scale_x_continuous(name = "Date", limits = c(1, ntps), breaks = 1:ntps, labels = x.axis.label) + 
-    ggplot2::scale_y_continuous(name = ylab) + ggplot2::theme(text = ggplot2::element_text(size = 8, color = "gray20", face = "italic"), 
-                                                              axis.text.x = ggplot2::element_text(face = "plain", angle = 90, size = 6), axis.text.y = ggplot2::element_text(face = "plain"))
-  pl = pl + ggplot2::geom_line(ggplot2::aes(x = 1:ntps, y = mydata$model$raw), col = "darkred", size = 2)	
+  pl = ggplot2::ggplot(data = NULL) + 
+    ggplot2::scale_x_continuous(name = "Date", limits = c(1, ntps), breaks = 1:ntps, labels = x.axis.label) + 
+    ggplot2::scale_y_continuous(name = ylab) + 
+    ggplot2::theme(text = ggplot2::element_text(size = 8, color = "gray20", face = "italic"), axis.text.x = ggplot2::element_text(face = "plain", angle = 90, size = 6), axis.text.y = ggplot2::element_text(face = "plain"))
   
-  pl = pl + ggplot2::annotate("text", x = -Inf, y = Inf, label = title, 
-                              hjust = 0, vjust = 2.5, col = "black", family = "serif", size = 3.0)
+  pl = pl + ggplot2::geom_line(ggplot2::aes(x = 1:ntps, y = mydata$model$raw), col = "darkred", size = 2, na.rm=T)	
+  
+  pl = pl + ggplot2::annotate("text", x = -Inf, y = Inf, label = title, hjust = 0, vjust = 2.5, col = "black", family = "serif", size = 3.0)
   
   ggplot2::ggsave(filename = filename, plot = pl, device = device, width = 14, height = 9, units = "cm")
   
@@ -218,7 +219,9 @@ plot_results <- function(rtn = NULL, profile = NULL, tab = NULL, mydata = NULL, 
   breaks = seq(from = 1, to = nperiods, by = 4)
   labels = dates[breaks]
   
-  plotlist[[1]] = ggplot2::ggplot(data = NULL) + ggplot2::scale_x_continuous(name = "Date", limits = range(tps), breaks = tps[breaks], labels = labels) + ggplot2::theme(text = ggplot2::element_text(size = 10, color = "gray20", face = "italic"), axis.text.x = ggplot2::element_text(face = "plain", angle = 90), axis.text.y = ggplot2::element_text(face = "plain")) #limits = c(1, nperiods)
+  plotlist[[1]] = ggplot2::ggplot(data = NULL) + 
+    ggplot2::scale_x_continuous(name = "Date", limits = range(tps), breaks = tps[breaks], labels = labels) +
+    ggplot2::theme(text = ggplot2::element_text(size = 10, color = "gray20", face = "italic"), axis.text.x = ggplot2::element_text(face = "plain", angle = 90), axis.text.y = ggplot2::element_text(face = "plain")) #limits = c(1, nperiods)
   
   step = 1 #max(1, nRnd/10)
   irnd.set = seq(from = 1, to = nRnd, by = step)
@@ -227,22 +230,25 @@ plot_results <- function(rtn = NULL, profile = NULL, tab = NULL, mydata = NULL, 
   data.rnd = reshape::melt(dat.rnd)
   data.rnd.pred = reshape::melt(dat.rnd.pred)
   
-  plotlist[[1]] = plotlist[[1]] + ggplot2::geom_line(ggplot2::aes(x =rep(tps[1:nperiodsFit], nRnd), y = data.rnd[, 3], group = data.rnd[, 2]), col = "#E495A5", size = 2, alpha = 0.4) + 
+  plotlist[[1]] = plotlist[[1]] + 
+    ggplot2::geom_line(ggplot2::aes(x =rep(tps[1:nperiodsFit], nRnd), y = data.rnd[, 3], group = data.rnd[, 2]), col = "#E495A5", size = 2, alpha = 0.4) + 
     ggplot2::geom_line(ggplot2::aes(x = tps[1:nperiodsFit], y = rtn[1:nperiodsFit]), col = "#39BEB1", size = 1) + 
     ggplot2::geom_line(ggplot2::aes(x = tps[1:nperiodsFit], y = model_mean[1:nperiodsFit]), col = "#099DD7", size = 0.8) + 
     ggplot2::geom_line(ggplot2::aes(x = tps[1:nperiodsFit], y = obs[1:nperiodsFit]), col = "black", na.rm = TRUE) + 
     ggplot2::geom_point(ggplot2::aes(x = tps[1:nperiodsFit], y = obs[1:nperiodsFit]), col = "#24576D", size = 1, na.rm = TRUE) #x = data.rnd[, 1]
   
   if (nperiodsFit < nperiods) {
-    plotlist[[1]] = plotlist[[1]] + ggplot2::geom_line(ggplot2::aes(x = (rep(tps[nperiodsFit:nperiods], nRnd) + tps[nperiodsFit - 1]), y = data.rnd.pred[, 3], group = data.rnd.pred[, 2]), col = "#E495A5", size = 2, linetype = 2, alpha = 0.4) + 
+    plotlist[[1]] = plotlist[[1]] + 
+      ggplot2::geom_line(ggplot2::aes(x = (rep(tps[nperiodsFit:nperiods], nRnd)), y = data.rnd.pred[, 3], group = data.rnd.pred[, 2]), col = "#E495A5", size = 2, linetype = 2, alpha = 0.4) + 
       ggplot2::geom_line(ggplot2::aes(x = tps[nperiodsFit:nperiods], y = model_mean[nperiodsFit:nperiods]),	col = "#099DD7", size = 0.8, linetype = 2) + 
       ggplot2::geom_line(ggplot2::aes(x = tps[nperiodsFit:nperiods], y = rtn[nperiodsFit:nperiods]), col = "#39BEB1", size = 1, linetype = 2) +  
-      ggplot2::geom_line(ggplot2::aes(x = tps[nperiodsFit:nperiods], y = obs[nperiodsFit:nperiods]), col = "black", size = 1, linetype = 2) + 
+      ggplot2::geom_line(ggplot2::aes(x = tps[nperiodsFit:nperiods], y = obs[nperiodsFit:nperiods]), col = "black", size = 1, linetype = 2, na.rm = TRUE) + 
       ggplot2::geom_rect(ggplot2::aes(xmin = tps[nperiodsFit], xmax = tps[nperiods], ymin = 0, ymax = ymax), fill = "#D497D3", alpha = 0.4)
   }
   
   reg.name = paste0("   ", c("User Data", "Model-Best", "Model-Mean", "Model-Random"))
-  plotlist[[1]] = plotlist[[1]] + ggplot2::annotate("text", x = rep(-Inf, 5), y = rep(Inf, 5), label = c(paste0("   ", mydata$FY), reg.name), hjust = rep(0, 5), vjust = seq(from = 2.5, to = 8.5, by = 1.5), col = c("black", "black", "#39BEB1", "#099DD7", "#E495A5"), family = "serif", size = 3.5)
+  plotlist[[1]] = plotlist[[1]] + 
+    ggplot2::annotate("text", x = rep(-Inf, 5), y = rep(Inf, 5), label = c(paste0("   ", mydata$FY), reg.name), hjust = rep(0, 5), vjust = seq(from = 2.5, to = 8.5, by = 1.5), col = c("black", "black", "#39BEB1", "#099DD7", "#E495A5"), family = "serif", size = 3.5)
   
   
   
@@ -332,9 +338,13 @@ plot_results <- function(rtn = NULL, profile = NULL, tab = NULL, mydata = NULL, 
     # end workaround 
     
     plotlist[[icount]] = ggplot2::ggplot(data = data, ggplot2::aes(x = x)) + 
-      ggplot2::geom_histogram(data = data, ggplot2::aes(y = ..density..), fill = my.color, col = "white", alpha = 0.7) + ggplot2::scale_x_continuous(name = my.par) + 
-      ggplot2::scale_y_continuous(name = "") + ggplot2::theme(text = ggplot2::element_text(size = 10, color = "gray20", face = "italic"), axis.text.x = ggplot2::element_text(face = "plain"), axis.text.y = ggplot2::element_text(face = "plain"))
-    plotlist[[icount]] = plotlist[[icount]] + ggplot2::annotate("text", x = rep(-Inf, 2), y = rep(Inf, 2), label = c(paste0("   ", "Mean ", my.mean), paste0("   ", "SD ", my.sd)), hjust = rep(0, 2), vjust = seq(from = 2.5, to = 4, by = 1.5), col = c("black", "black"), family = "serif", size = 3.5) + 
+      ggplot2::geom_histogram(data=data, ggplot2::aes(y = ..density..), fill = my.color, col = "white", alpha = 0.7) + 
+      ggplot2::scale_x_continuous(name = my.par) + 
+      ggplot2::scale_y_continuous(name = "") + 
+      ggplot2::theme(text = ggplot2::element_text(size = 10, color = "gray20", face = "italic"), axis.text.x = ggplot2::element_text(face = "plain"), axis.text.y = ggplot2::element_text(face = "plain"))
+    
+    plotlist[[icount]] = plotlist[[icount]] + 
+      ggplot2::annotate("text", x = rep(-Inf, 2), y = rep(Inf, 2), label = c(paste0("   ", "Mean ", my.mean), paste0("   ", "SD ", my.sd)), hjust = rep(0, 2), vjust = seq(from = 2.5, to = 4, by = 1.5), col = c("black", "black"), family = "serif", size = 3.5) + 
       ggplot2::annotate("text", x = rep(Inf, 2), y = rep(Inf, 2), label = my.par, hjust = 2, vjust = 2.5, col = "black", family = "serif", size = 4)
     
   }

@@ -4,11 +4,14 @@
 \alias{runDRAFT}
 \title{Main driver for using \code{DRAFT} to fit user provided incidence data.}
 \usage{
-runDRAFT(inc_data = NULL, pop = 10000, epi_model = 1, Tg = 3,
-  sigma = NULL, dp = NULL, dq = NULL, ts = NULL, dL = NULL)
+runDRAFT(inc_data = NULL, out_dir = NULL, pop = 10000,
+  epi_model = 1, Tg = 3, sigma = NULL, dp = NULL, dq = NULL,
+  ts = NULL, dL = NULL, nMCMC = 10000)
 }
 \arguments{
 \item{inc_data}{Dataframe containing incidence data.  Must contain 'date' and 'cases' columns.  The 'date' column must either be Date-class or convert to Date-class using as.Date(inc_data$date, format="\%Y-\%m-\%d").}
+
+\item{out_dir}{Character string containing file path for output images and data files.  If not specified, DRAFT will not generate output images or files.}
 
 \item{pop}{Integer population of the region for which incidence is provided}
 
@@ -25,6 +28,8 @@ runDRAFT(inc_data = NULL, pop = 10000, epi_model = 1, Tg = 3,
 \item{ts}{Date class.  Start date of behavior modification.}
 
 \item{dL}{Number of days for behavior modification to completely take effect.}
+
+\item{nMCMC}{Number of steps to take in the Markov Chain Monte Carlo (MCMC) process.  Number of steps needed for a good 'fit' will vary from case-to-case, but should never be less than 1e4.}
 }
 \value{
 A list with the input and entire output of the run.  List entries:
@@ -51,17 +56,27 @@ We support S-I-R and S-E-I-R models for a single population with a fixed (non-ti
 Data fitting is done using a Markov Chain Monte Carlo (MCMC) procedure.  While generally discussed in the context of optimization, this procedure results in a mapping of the objective distribution.  Thus the results of runDRAFT() come in the form of a distribution of parameters and the resulting distribution of incidence profiles.
 }
 \examples{
-# See examples vignette for more a more in-depth walkthrough.
+# See examples vignette for a more in-depth walkthrough.
 vignette("DRAFT_examples")
-# Run an SEIR model using the incidence file and assuming a population of 1 million people.
-# The generation time and latent period are set to 2.6 days and 3 days respectively
+# Run an SEIR model using the incidence file and assuming a 
+# population of 1 million people.
+# The generation time and latent period are set to 2.6 days 
+# and 3 days respectively
 head(incidence_data2)
-\dontrun{output <- runDRAFT(inc_data=incidence_data2, pop = 1e6, 
-epi_model = 2, Tg = 2.6, sigma = 3.)}
+temp_write = tempdir()
+\donttest{output <- runDRAFT(inc_data=incidence_data2, out_dir=temp_write,
+ pop = 1e6, epi_model = 2, Tg = 2.6, sigma = 3.)}
+\dontshow{output <- runDRAFT(inc_data=incidence_data2, out_dir=temp_write,
+ pop = 1e6, epi_model = 2, Tg = 2.6, sigma = 3., nMCMC=100)}
 
-# Run an SIR model using the incidence file and assuming a population of 10,000 people.
-# The generation time is set to 3 days. (No need to define a latent period.)
+# Run an SIR model using the incidence file and assuming a 
+# population of 10,000 people.
+# The generation time is set to 3 days. (No need to define 
+# a latent period.)
 head(incidence_data1)
-\dontrun{output <- runDRAFT(inc_data=incidence_data2, pop = 1e5, epi_model = 1, Tg = 3.)}
+\donttest{output <- runDRAFT(inc_data=incidence_data2, out_dir=temp_write,
+ pop = 1e5, epi_model = 1, Tg = 3.)}
+\dontshow{output <- runDRAFT(inc_data=incidence_data2, out_dir=NULL,
+ pop = 1e5, epi_model = 1, Tg = 3., nMCMC=100)}
 
 }

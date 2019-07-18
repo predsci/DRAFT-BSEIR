@@ -2,11 +2,11 @@
 
       implicit none
       INTEGER idum,n  
-      REAL*8 bnldev,pp,PI  
+      REAL(8) bnldev,pp,PI
 CU    USES gammln,ran1  
       PARAMETER (PI=3.141592654d0)  
       INTEGER j,nold  
-      REAL*8 am,em,en,g,oldg,p,pc,pclog,plog,pold,sq,t,y,gammln,ran1
+      REAL(8) am,em,en,g,oldg,p,pc,pclog,plog,pold,sq,t,y,gammln,ran1
       SAVE nold,pold,pc,plog,pclog,en,oldg
       DATA nold /-1/, pold /-1.0d0/  
 
@@ -58,9 +58,9 @@ CU    USES gammln,ran1
 
       FUNCTION ran1(idum)  
       INTEGER idum,IA,IM,IQ,IR,NTAB,NDIV  
-      REAL*8 ran1,AM,EPS,RNMX  
+      REAL(8) ran1,AM,EPS,RNMX
       PARAMETER (IA=16807,IM=2147483647,AM=1./IM,IQ=127773,IR=2836,  
-     *NTAB=32,NDIV=1+(IM-1)/NTAB,EPS=1.2e-7,RNMX=1.-EPS)  
+     *NTAB=32,NDIV=1+(real(IM,8)-1.)/NTAB,EPS=1.2e-7,RNMX=1.-EPS)  
       INTEGER j,k,iv(NTAB),iy  
       SAVE iv,iy  
       DATA iv /NTAB*0/, iy /0/  
@@ -85,9 +85,9 @@ CU    USES gammln,ran1
       END  
 
       FUNCTION gammln(xx)  
-      REAL*8 gammln,xx  
+      REAL(8) gammln,xx
       INTEGER j  
-      REAL*8 ser,stp,tmp,x,y,cof(6)  
+      REAL(8) ser,stp,tmp,x,y,cof(6)
       SAVE cof,stp  
       DATA cof,stp/76.18009172947146d0,-86.50532032941677d0,  
      *24.01409824083091d0,-1.231739572450155d0,.1208650973866179d-2,  
