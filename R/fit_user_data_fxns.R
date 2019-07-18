@@ -19,7 +19,7 @@
 #' @param ts Date class.  Start date of behavior modification.
 #' @param dL Number of days for behavior modification to completely take effect.
 #' @param out_dir Character string containing file path for output images and data files.  If not specified, DRAFT will not generate output images or files.
-#' @param nMCMC Number of steps to take in the Markov Chain Monte Carlo (MCMC) process.  Number of steps needed for a good 'fit' will vary from case-to-case, but should never be less than 1e4.
+#' @param nMCMC Number of steps to take in the Markov Chain Monte Carlo (MCMC) process.  Number of steps needed for a good 'fit' will vary from case-to-case, but should never be less than 1e3.  It is recommended to start at 1e4 and increase as needed.
 #' @return A list with the input and entire output of the run.  List entries:
 #'   \itemize{
 #'     \item \emph{mydata}: A data structure containing the input data.
@@ -46,8 +46,8 @@
 #' temp_write = tempdir()
 #' \donttest{output <- runDRAFT(inc_data=incidence_data2, out_dir=temp_write,
 #'  pop = 1e6, epi_model = 2, Tg = 2.6, sigma = 3.)}
-#' \dontshow{output <- runDRAFT(inc_data=incidence_data2, out_dir=temp_write,
-#'  pop = 1e6, epi_model = 2, Tg = 2.6, sigma = 3., nMCMC=1000)}
+#' \dontshow{output <- runDRAFT(inc_data=incidence_data2, out_dir=NULL,
+#'  pop = 1e6, epi_model = 2, Tg = 2.6, sigma = 3., nMCMC=200)}
 #'
 #' # Run an SIR model using the incidence file and assuming a 
 #' # population of 10,000 people.
@@ -57,7 +57,7 @@
 #' \donttest{output <- runDRAFT(inc_data=incidence_data2, out_dir=temp_write,
 #'  pop = 1e5, epi_model = 1, Tg = 3.)}
 #' \dontshow{output <- runDRAFT(inc_data=incidence_data2, out_dir=NULL,
-#'  pop = 1e5, epi_model = 1, Tg = 3., nMCMC=100)}
+#'  pop = 1e5, epi_model = 1, Tg = 3., nMCMC=200)}
 #'
 #' @export
 runDRAFT <- function(inc_data=NULL,
@@ -74,6 +74,10 @@ runDRAFT <- function(inc_data=NULL,
   
   
   ## Set the MCMC parameters
+  
+  if (nMCMC<200) {
+    stop("MCMC code becomes unstable for nMCMC<200.  Please set nMCMC>=200 and rerun.  Additional note: nMCMC<1000 should be used only for testing purposes.  A complete 'fit' will likely take 10,000 steps or more.")
+  }
   
   # nMCMC = 1e6
   # nMCMC = 1e4
