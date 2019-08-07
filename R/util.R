@@ -19,16 +19,16 @@ set.iseed <- function() {
 makeDir <- function(subDir = NULL) {
   #### Create a sub-directory
   ####
-  #### Create a sub-directory for a \pkg{DRAFT} run under the current working directory.   If this sub-directory already exists it does NOT overwrite it.
-  #### @param subDir String - the sub-directory name for all output files of the run. Default it 'output'
+  #### If user defined directory 'subDir' does not currently exist, create it.
+  #### @param subDir String - the directory name for all output files of the run.
   #### @examples
   #### makeDir{subDir='output'}
 
-  if (is.null(subDir))
-    subDir = "output"
-  mainDir = getwd()
+  if (is.null(subDir)) {
+    stop("DEBUG: makeDir() should never be called with a NULL input.")
+  }
   if (!file.exists(subDir)) {
-    dir.create(file.path(mainDir, subDir))
+    dir.create(file.path(subDir))
   }
 
   return(err = 0)
@@ -92,7 +92,7 @@ trimdata.in <- function(longvec) {
 #### @return err=0 if plot was created
 ####
 #### @export
-plot_disease <- function(mydata = NULL,  device = 'png') {
+plot_disease <- function(mydata = NULL,  device = 'png', verbose=FALSE) {
   
   if (is.null(device))
     device = "png"
@@ -123,7 +123,11 @@ plot_disease <- function(mydata = NULL,  device = 'png') {
     filename = paste0(subDir,myName,"-incidence.png")
   }
   
-  cat("\n\n For a Plot of the Results See: ", filename, "\n\n")
+  if (verbose) {
+    cat("\n\n For a Plot of the Incidence See: ", filename, "\n\n")
+  }
+  
+  
   FY = mydata$FY
   
   ylab = " # Cases"
@@ -135,7 +139,7 @@ plot_disease <- function(mydata = NULL,  device = 'png') {
     ggplot2::scale_y_continuous(name = ylab) + 
     ggplot2::theme(text = ggplot2::element_text(size = 8, color = "gray20", face = "italic"), axis.text.x = ggplot2::element_text(face = "plain", angle = 90, size = 6), axis.text.y = ggplot2::element_text(face = "plain"))
   
-  pl = pl + ggplot2::geom_line(ggplot2::aes(x = 1:ntps, y = mydata$model$raw), col = "darkred", size = 2, na.rm=T)	
+  pl = pl + ggplot2::geom_line(ggplot2::aes(x = 1:ntps, y = mydata$model$raw), col = "darkred", size = 2, na.rm=TRUE)	
   
   pl = pl + ggplot2::annotate("text", x = -Inf, y = Inf, label = title, hjust = 0, vjust = 2.5, col = "black", family = "serif", size = 3.0)
   
@@ -163,7 +167,7 @@ plot_disease <- function(mydata = NULL,  device = 'png') {
 #### mydata = mydata, ireal = ireal, idevice = device)
 #### }
 #### @export
-plot_results <- function(rtn = NULL, profile = NULL, tab = NULL, mydata = NULL, device = 'png') {
+plot_results <- function(rtn = NULL, profile = NULL, tab = NULL, mydata = NULL, device = 'png', verbose=FALSE) {
 
   if (is.null(device))
     device = "png"
@@ -359,14 +363,17 @@ plot_results <- function(rtn = NULL, profile = NULL, tab = NULL, mydata = NULL, 
     mp = plotlist[[1]]
   }
   
-  cat("\n\n For a Plot of the Results See: ", filename, "\n\n")	
+  # if (verbose) {
+    message("\n\n For a Plot of the Results See: ", filename, "\n\n")
+  # }
+  	
   ggplot2::ggsave(file = filename, plot = mp, device = device, width = 9, height = 7, units = "in")
   
   return(err = 0)
   
 }
 
-write.profiles <- function(mydata=NULL, rtn = NULL, profile = NULL) {
+write.profiles <- function(mydata=NULL, rtn = NULL, profile = NULL, verbose=FALSE) {
   ####
   #### Save the profiles for Model region
   #### Save the profiles for Model region so that incidence plot can be re-created
@@ -400,12 +407,15 @@ write.profiles <- function(mydata=NULL, rtn = NULL, profile = NULL) {
   filename = paste(mydata$subDir, "/profiles-", myName, "-", nperiodsFit,".RData", sep = "")
   save(dump, file = filename) 
   
-  cat("\nSaving Profiles to a Binary File : ", filename, "\n")    
+  # if (verbose) {
+    message("\nSaving Profiles to a Binary File : ", filename, "\n")
+  # }
+      
   
   return(err = 0)
 }
 
-write.mcmc <- function(tab = NULL, opt.list = NULL, run.list = NULL, mydata = NULL, imask = NULL) {
+write.mcmc <- function(tab = NULL, opt.list = NULL, run.list = NULL, mydata = NULL, imask = NULL, verbose=FALSE) {
   
   #### Write the MCMC History of a \pkg{DRAFT} run
   ####
@@ -471,13 +481,17 @@ write.mcmc <- function(tab = NULL, opt.list = NULL, run.list = NULL, mydata = NU
   if (!is.null(tab)) {
     tmp = results.list
     colnames(tmp) = c(myColName, "AICc")
-    print(summary(tmp[,c(names.opt,"AICc")], quantiles = c(0.05, 0.25, 0.5, 0.75, 0.95, na.rm = TRUE), digits = 2))
+    if (verbose) {
+      print(summary(tmp[,c(names.opt,"AICc")], quantiles = c(0.05, 0.25, 0.5, 0.75, 0.95, na.rm = TRUE), digits = 2))
+    }
   }
   
   
   # save the complete chain here
   filename <- paste(subDir, "/mcmc-", myName, "-", nperiodsFit, ".RData", sep = "")
-  cat("\n Writing R object Data file for this Chain: ", filename, "\n")
+  if (verbose) {
+    cat("\n Writing R object Data file for this Chain: ", filename, "\n")
+  }
   
   dump = list()
   dump = list(mydata = mydata, tab = tab, opt.list = opt.list, run.list = run.list, imask = imask)

@@ -40,17 +40,19 @@ Tg = 2.6
 sigma = NULL
 # Parameters for behavior modification model only
 dp = dq = ts = dL = NULL
+# designate an output directory path.
+write_dir = tempdir()
 
 ```
 
 To run DRAFT, execute the following line in an R console.  It will take a minute or two to execute the MCMC fitting procedure.  The function will create a subdirectory of the current working directory and save the resulting .RData and .png files there.  For more details see the runDRAFT help page `?runDRAFT`.
 
 ```{r, eval=F}
-results <- runDRAFT(inc_data=incidence_data1, epi_model=epi_model, pop=pop, Tg=Tg, dp=dp, dq=dq, ts=ts, dL=dL)
+results <- runDRAFT(inc_data=incidence_data1, out_dir=write_dir, epi_model=epi_model, pop=pop, Tg=Tg, dp=dp, dq=dq, ts=ts, dL=dL, verbose=T)
 ```
 ```{r}
-# view results in subdirectory
-paste0("user_data_", Sys.Date(), "_Tg_", Tg, "/")
+# view results in directory
+paste0(write_dir, "/user_data_", Sys.Date(), "_Tg_", Tg, "/")
 ```
 
 &nbsp;
@@ -101,17 +103,19 @@ Tg = 2.6
 sigma = NULL
 # Parameters for behavior modification model only
 dp = dq = ts = dL = NULL
+# designate an output directory
+write_dir = tempdir()
 
 ```
 
 To run DRAFT, execute the following line in an R console.  It will take a minute or two to execute the MCMC fitting procedure.  The function will create a subdirectory of the current working directory and save the resulting .RData and .png files there.  For more details see the runDRAFT help page `?runDRAFT`.
 
 ```{r, eval=F}
-results <- runDRAFT(inc_data=incidence_data2, epi_model=epi_model, pop=pop, Tg=Tg, dp=dp, dq=dq, ts=ts, dL=dL)
+results <- runDRAFT(inc_data=incidence_data2, out_dir=write_dir, epi_model=epi_model, pop=pop, Tg=Tg, dp=dp, dq=dq, ts=ts, dL=dL)
 ```
 ```{r}
 # view results in subdirectory
-paste0("user_data_", Sys.Date(), "_Tg_", Tg, "/")
+paste0(write_dir, "/user_data_", Sys.Date(), "_Tg_", Tg, "/")
 ```
 
 
@@ -162,16 +166,19 @@ ts = as.Date("2014-07-30")
 # It took approximately 20 days for the changes to fully 
 # take hold.
 dL = 20
+# designate an output directory
+write_dir = tempdir()
+
 ```
 
 To run DRAFT, execute the following line in an R console.  It will take a minute or two to execute the MCMC fitting procedure.  The function will create a subdirectory of the current working directory and save the resulting .RData and .png files there.  For more details see the runDRAFT help page `?runDRAFT`.
 
 ```{r, eval=F}
-results <- runDRAFT(inc_data=incidence_data3, epi_model=epi_model, pop=pop, Tg=Tg, dp=dp, dq=dq, ts=ts, dL=dL)
+results <- runDRAFT(inc_data=incidence_data3, out_dir=write_dir, epi_model=epi_model, pop=pop, Tg=Tg, dp=dp, dq=dq, ts=ts, dL=dL)
 ```
 ```{r}
 # view results in subdirectory
-paste0("user_data_", Sys.Date(), "_Tg_", Tg, "/")
+paste0(write_dir, "/user_data_", Sys.Date(), "_Tg_", Tg, "/")
 ```
 
 
@@ -228,16 +235,18 @@ dq = 0.45
 ts = as.Date("2014-07-30")
 # It took approximately 20 days for the changes to fully take hold.
 dL = 20
+# designate an output directory
+write_dir = tempdir()
 ```
 
 To run DRAFT, execute the following line in an R console.  It will take a minute or two to execute the MCMC fitting procedure.  The function will create a subdirectory of the current working directory and save the resulting .RData and .png files there.  For more details see the runDRAFT help page `?runDRAFT`.
 
 ```{r, eval=F}
-results <- runDRAFT(inc_data=incidence_data4, epi_model=epi_model, pop=pop, Tg=Tg, dp=dp, dq=dq, ts=ts, dL=dL)
+results <- runDRAFT(inc_data=incidence_data4, out_dir=write_dir, epi_model=epi_model, pop=pop, Tg=Tg, dp=dp, dq=dq, ts=ts, dL=dL)
 ```
 ```{r}
 # view results in subdirectory
-paste0("user_data_", Sys.Date(), "_Tg_", Tg, "/")
+paste0(write_dir, "/user_data_", Sys.Date(), "_Tg_", Tg, "/")
 ```
 
 
@@ -279,17 +288,19 @@ Tg = 17
 sigma = 5
 # Parameters for behavior modification model only
 dp = dq = ts = dL = NULL
+# designate an output directory
+write_dir = tempdir()
 ```
 
 To run DRAFT, execute the following line in an R console.  It will take a minute or two to execute the MCMC fitting procedure.  The function will create a subdirectory of the current working directory and save the resulting .RData and .png files there.  For more details see the runDRAFT help page `?runDRAFT`.
 
 ```{r, eval=F}
-results <- runDRAFT(inc_data=incidence_data3, epi_model=epi_model, pop=pop, Tg=Tg, dp=dp, dq=dq, ts=ts, dL=dL)
+results <- runDRAFT(inc_data=incidence_data3, out_dir=write_dir, epi_model=epi_model, pop=pop, Tg=Tg, dp=dp, dq=dq, ts=ts, dL=dL)
 ```
 
 ```{r}
 # view results in subdirectory
-paste0("user_data_", Sys.Date(), "_Tg_", Tg, "/")
+paste0(write_dir, "/user_data_", Sys.Date(), "_Tg_", Tg, "/")
 ```
 
 &nbsp;

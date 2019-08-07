@@ -20,6 +20,7 @@
 #' @param dL Number of days for behavior modification to completely take effect.
 #' @param out_dir Character string containing file path for output images and data files.  If not specified, DRAFT will not generate output images or files.
 #' @param nMCMC Number of steps to take in the Markov Chain Monte Carlo (MCMC) process.  Number of steps needed for a good 'fit' will vary from case-to-case, but should never be less than 1e3.  It is recommended to start at 1e4 and increase as needed.
+#' @param verbose This logical flag determines if code updates are printed to console/STDOUT during execution.  It is recommended that verbose be set to TRUE for longer runs so the user may monitor progress.
 #' @return A list with the input and entire output of the run.  List entries:
 #'   \itemize{
 #'     \item \emph{mydata}: A data structure containing the input data.
@@ -37,6 +38,7 @@
 #' @details Data fitting is done using a Markov Chain Monte Carlo (MCMC) procedure.  While generally discussed in the context of optimization, this procedure results in a mapping of the objective distribution.  Thus the results of runDRAFT() come in the form of a distribution of parameters and the resulting distribution of incidence profiles.
 #' @examples
 #' # See examples vignette for a more in-depth walkthrough.
+#' library(DRAFT)
 #' vignette("DRAFT_examples")
 #' # Run an SEIR model using the incidence file and assuming a 
 #' # population of 1 million people.
@@ -70,7 +72,8 @@ runDRAFT <- function(inc_data=NULL,
                      dq = NULL,
                      ts = NULL,
                      dL = NULL,
-                     nMCMC = 1e4) {
+                     nMCMC = 1e4,
+                     verbose = TRUE) {
   
   
   ## Set the MCMC parameters
@@ -92,7 +95,7 @@ runDRAFT <- function(inc_data=NULL,
   
   # if no outdir specified, warn user that results images will not be made
   if (is.null(out_dir)) {
-    cat("Warning. Output directory 'out_dir' has not been specified.  DRAFT will not produce output images or files.")
+    warning("Output directory 'out_dir' has not been specified.  DRAFT will not produce output images or files.")
     write_out = FALSE
   } else {
     write_out = TRUE
@@ -106,7 +109,7 @@ runDRAFT <- function(inc_data=NULL,
           # inc_data is properly formatted, proceed
         } else {
           # re-order data chronologically
-          cat("Warning. The dates of 'inc_data' are not in chronological order.  Re-ordering rows now.\n")
+          warning("The dates of 'inc_data' are not in chronological order.  Re-ordering rows now.\n")
           inc_data = inc_data[order(inc_data$date), ]
         }
       } else {
@@ -145,7 +148,9 @@ runDRAFT <- function(inc_data=NULL,
   if(dir.exists(use_dir) & write_out) {
     oldDir = use_dir
     use_dir = paste0(use_dir, "-", Sys.time())
-    cat("\n Renaming Write Directory From:", oldDir, " to ", use_dir, '\n\n')
+    if (verbose) {
+      cat("\n Renaming Write Directory From:", oldDir, " to ", use_dir, '\n\n')
+    }
   }
   use_dir = paste0(use_dir,'/')
   mydata$subDir = use_dir
@@ -158,7 +163,7 @@ runDRAFT <- function(inc_data=NULL,
   
   # Plot the incidence - there is no historic data
   if (write_out) {
-    err <- plot_disease(mydata = mydata, device = device)
+    err <- plot_disease(mydata = mydata, device = device, verbose=verbose)
   }
   
   ##
@@ -172,7 +177,7 @@ runDRAFT <- function(inc_data=NULL,
   run.list <- set.run.list(nMCMC = nMCMC, nlines = nlines, device = device, subDir = mydata$subDir)
   ## Fit the data
   
-  output <- fit.user.data(mydata = mydata, par_names = par_names, opt.list = opt.list, run.list = run.list, write_out=write_out)
+  output <- fit.user.data(mydata = mydata, par_names = par_names, opt.list = opt.list, run.list = run.list, write_out=write_out, verbose=verbose)
   return(output)
   
 }
@@ -210,8 +215,7 @@ build.mydata <- function(inc_data=NULL,
   
   if (epi_model == 3) {
     if (is.null(ts) ||is.null(dL)) {
-      cat("\n For behavior Modification Models User must provide date of \n behavior modification start and time it takes to take full effect: \n ts and dL respectively \n\n Code will STOP \n")
-      quit()
+      stop("\n For behavior Modification Models User must provide date of \n behavior modification start and time it takes to take full effect: \n ts and dL respectively \n\n Code will STOP \n")
     }
   }
   
@@ -268,15 +272,13 @@ build.mydata <- function(inc_data=NULL,
   
   if (epi_model == 3) {
     if (as.numeric(ts - mydata$dates[1]) < 0) {
-      cat("Start Day of intervention must be after Day 1 of incdience. \n Code will STOP \n\n")
-      quit()
+      stop("Start Day of intervention must be after Day 1 of incdience. \n Code will STOP \n\n")
     }
   }
   
   if (epi_model == 3 && nperiodsData < nperiods) {
     if(is.null(dp) || is.null(dq)) {
-      cat("\n For a Forecast with Behavior Modification Model user Must provide dp and dq:\n Fractional reduction in mixing rate  of susceptible and infectious populations. \n Code will STOP\n\n")
-      quit()
+      stop("\n For a Forecast with Behavior Modification Model user Must provide dp and dq:\n Fractional reduction in mixing rate  of susceptible and infectious populations. \n Code will STOP\n\n")
     }
   }
   # build the cadence between the dates
@@ -689,7 +691,8 @@ fit.user.data <- function(mydata = NULL,
            par_names = NULL,
            opt.list = NULL,
            run.list = NULL,
-           write_out = FALSE) {
+           write_out = FALSE,
+           verbose = FALSE) {
 
 
 	tps = cumsum(mydata$ndays)
@@ -751,6 +754,12 @@ fit.user.data <- function(mydata = NULL,
 
 	## MCMC Fitting procedure
 	##
+	if (!verbose) {
+	  # sink all Fortran output to a variable
+	  stdout = character()
+	  temp_con = textConnection("stdout", open="wr", local=TRUE)
+	  sink(temp_con)
+	}
 	if (mydata$epi_model == 1) {
 		cat("\n\n Fitting S-I-R model to User Data \n\n")
 		out <- .Fortran("fitsir", epi = as.double(cases), gamaepi = as.double(gamaepi), wght = as.double(wght), nparam = as.integer(nparam), par = as.double(par), parmin = as.double(pmin), parmax = as.double(pmax), step = as.double(dx), ilog = as.integer(logvec), Temp = as.double(mydata$Temp), imask = as.integer(imask), iseed = as.integer(iseed), nsamps = as.integer(nMCMC), ithin = as.integer(ithin), nperiods = as.integer(nperiods), tps = as.double(tps), rtn = as.double(rep(0, nperiods)), pois = as.double(pois), ndays = as.integer(ndays), nRrnd = as.integer(nRnd), tab = as.single(tab), profile = as.single(profile), PACKAGE="DRAFT")
@@ -768,6 +777,11 @@ fit.user.data <- function(mydata = NULL,
 		out <- .Fortran("fitsir", epi = as.double(cases), gamaepi = as.double(gamaepi), wght = as.double(wght), nparam = as.integer(nparam), par = as.double(par), parmin = as.double(pmin), parmax = as.double(pmax), step = as.double(dx), ilog = as.integer(logvec), Temp = as.double(mydata$Temp), imask = as.integer(imask), iseed = as.integer(iseed), nsamps = as.integer(nMCMC), ithin = as.integer(ithin), nperiods = as.integer(nperiods), tps = as.double(tps), rtn = as.double(rep(0, nperiods)), pois = as.double(pois), ndays = as.integer(ndays), nRrnd = as.integer(nRnd),	tab = as.single(tab), profile = as.single(profile), PACKAGE="DRAFT")
 	}
 
+	if (!verbose) {
+	  # close sink of Fortran output
+	  sink()
+	  close(temp_con)
+	}
 
 	# Random fits
 	profile = array(out$profile, c(nRnd, nperiods))
@@ -781,14 +795,14 @@ fit.user.data <- function(mydata = NULL,
 	
 	if (write_out) {
 	  # plot the results
-	  plotlist <- plot_results(rtn = rtn, profile = profile, tab = tab, mydata = mydata, device = device)
+	  plotlist <- plot_results(rtn = rtn, profile = profile, tab = tab, mydata = mydata, device = device, verbose=verbose)
 	  
 	  ## Dump all the profiles we have to a file
 	  ##
-	  err <- write.profiles(mydata = mydata, rtn = rtn, profile = profile)
+	  err <- write.profiles(mydata = mydata, rtn = rtn, profile = profile, verbose=verbose)
 	  
 	  ## Dump the MCMC parameters
-	  err <- write.mcmc(mydata = mydata, tab = tab, opt.list = opt.list, run.list = run.list, imask = imask)
+	  err <- write.mcmc(mydata = mydata, tab = tab, opt.list = opt.list, run.list = run.list, imask = imask, verbose=verbose)
 	}
 
 	## Build and return the results list

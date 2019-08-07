@@ -6,7 +6,7 @@
 \usage{
 runDRAFT(inc_data = NULL, out_dir = NULL, pop = 10000,
   epi_model = 1, Tg = 3, sigma = NULL, dp = NULL, dq = NULL,
-  ts = NULL, dL = NULL, nMCMC = 10000)
+  ts = NULL, dL = NULL, nMCMC = 10000, verbose = TRUE)
 }
 \arguments{
 \item{inc_data}{Dataframe containing incidence data.  Must contain 'date' and 'cases' columns.  The 'date' column must either be Date-class or convert to Date-class using as.Date(inc_data$date, format="\%Y-\%m-\%d").}
@@ -30,6 +30,8 @@ runDRAFT(inc_data = NULL, out_dir = NULL, pop = 10000,
 \item{dL}{Number of days for behavior modification to completely take effect.}
 
 \item{nMCMC}{Number of steps to take in the Markov Chain Monte Carlo (MCMC) process.  Number of steps needed for a good 'fit' will vary from case-to-case, but should never be less than 1e3.  It is recommended to start at 1e4 and increase as needed.}
+
+\item{verbose}{This logical flag determines if code updates are printed to console/STDOUT during execution.  It is recommended that verbose be set to TRUE for longer runs so the user may monitor progress.}
 }
 \value{
 A list with the input and entire output of the run.  List entries:
@@ -57,6 +59,7 @@ Data fitting is done using a Markov Chain Monte Carlo (MCMC) procedure.  While g
 }
 \examples{
 # See examples vignette for a more in-depth walkthrough.
+library(DRAFT)
 vignette("DRAFT_examples")
 # Run an SEIR model using the incidence file and assuming a 
 # population of 1 million people.
